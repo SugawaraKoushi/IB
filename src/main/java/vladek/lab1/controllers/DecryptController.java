@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vladek.lab1.dto.Request;
-import vladek.lab1.services.IDecodeService;
+import vladek.lab1.services.IDecryptService;
 
 @RestController
-@RequestMapping("api/lab1/decode")
-public class DecodeController {
+@RequestMapping("api/lab1/decrypt")
+public class DecryptController {
     @Autowired
-    private IDecodeService decodeService;
+    private IDecryptService decodeService;
 
     @PostMapping("/additive")
     public ResponseEntity<String> decodeFromAdditiveCipher(@RequestBody Request request) {

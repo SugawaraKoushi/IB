@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vladek.lab1.dto.Request;
-import vladek.lab1.services.IEncodeService;
+import vladek.lab1.services.IEncryptService;
 
 @RestController
-@RequestMapping("/api/lab1/encode")
-public class EncodeController {
+@RequestMapping("/api/lab1/encrypt")
+public class EncryptController {
     @Autowired
-    private IEncodeService encodeService;
+    private IEncryptService encodeService;
 
     @PostMapping("/additive")
     public ResponseEntity<String> encodeByAdditiveCipher(@RequestBody Request request) {
-        String result = encodeService.encodeByAdditiveCipherWithShift(request.getText(), request.getShift());
+        String result = encodeService.encryptByAdditiveCipherWithShift(request.getText(), request.getShift());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

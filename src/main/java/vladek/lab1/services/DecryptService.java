@@ -3,7 +3,7 @@ package vladek.lab1.services;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DecodeService implements IDecodeService {
+public class DecryptService implements IDecryptService {
     private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя_,.";
 
     @Override

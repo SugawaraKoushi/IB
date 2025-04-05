@@ -1,5 +1,5 @@
 package vladek.lab1.services;
 
-public interface IDecodeService {
+public interface IDecryptService {
     String decodeFromAdditiveCipherWithShift(String text, int shift);
 }

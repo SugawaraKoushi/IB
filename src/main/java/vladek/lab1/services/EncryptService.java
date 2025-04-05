@@ -3,11 +3,11 @@ package vladek.lab1.services;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EncodeService implements IEncodeService{
+public class EncryptService implements IEncryptService {
     private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя_,.";
 
     @Override
-    public String encodeByAdditiveCipherWithShift(String text, int shift) {
+    public String encryptByAdditiveCipherWithShift(String text, int shift) {
         String str = text.toLowerCase();
         StringBuilder sb = new StringBuilder();
 
@@ -18,4 +18,6 @@ public class EncodeService implements IEncodeService{
 
         return sb.toString();
     }
+
+
 }
