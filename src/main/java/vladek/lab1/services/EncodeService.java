@@ -21,11 +21,6 @@ public class EncodeService implements IEncodeService{
 
     private int getPositionAfterShift(int symbolPos, int shift) {
         int absolutePosition = symbolPos + shift;
-
-        while (absolutePosition > ALPHABET.length()) {
-            absolutePosition -= ALPHABET.length();
-        }
-
         return absolutePosition % ALPHABET.length();
     }
 }
