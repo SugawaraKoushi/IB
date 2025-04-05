@@ -12,10 +12,20 @@ public class DecodeService implements IDecodeService {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < text.length(); i++) {
-            int newSymbolIndex = (ALPHABET.indexOf(text.charAt(i)) - shift) % ALPHABET.length();
+            int newSymbolIndex = getSymbolPosition(ALPHABET.indexOf(text.charAt(i)), shift);
             sb.append(ALPHABET.charAt(newSymbolIndex));
         }
 
         return sb.toString();
+    }
+
+    private int getSymbolPosition(int pos, int shift) {
+        int absolutePos = pos - shift;
+
+        if (absolutePos < 0) {
+            absolutePos += ALPHABET.length();
+        }
+
+        return absolutePos % ALPHABET.length();
     }
 }
