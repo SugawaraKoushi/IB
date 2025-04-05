@@ -12,15 +12,10 @@ public class EncodeService implements IEncodeService{
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < text.length(); i++) {
-            int newSymbolIndex = getPositionAfterShift(ALPHABET.indexOf(text.charAt(i)), shift);
+            int newSymbolIndex = (ALPHABET.indexOf(text.charAt(i)) + shift) % ALPHABET.length();
             sb.append(ALPHABET.charAt(newSymbolIndex));
         }
 
         return sb.toString();
-    }
-
-    private int getPositionAfterShift(int symbolPos, int shift) {
-        int absolutePosition = symbolPos + shift;
-        return absolutePosition % ALPHABET.length();
     }
 }
