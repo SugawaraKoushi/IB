@@ -14,11 +14,17 @@ import vladek.lab1.services.IEncryptService;
 @RequestMapping("/api/lab1/encrypt")
 public class EncryptController {
     @Autowired
-    private IEncryptService encodeService;
+    private IEncryptService encryptService;
 
     @PostMapping("/additive")
-    public ResponseEntity<String> encodeByAdditiveCipher(@RequestBody Request request) {
-        String result = encodeService.encryptByAdditiveCipherWithShift(request.getText(), request.getShift());
+    public ResponseEntity<String> encryptByAdditiveCipher(@RequestBody Request request) {
+        String result = encryptService.encryptByAdditiveCipherWithShift(request.getText(), request.getShift());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/multiplicative")
+    public ResponseEntity<String> encryptFromMultiplicativeCipher(@RequestBody Request request) {
+        String result = encryptService.encryptByMultiplicativeCipherWithShift(request.getText(), request.getShift());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
