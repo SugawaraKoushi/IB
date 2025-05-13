@@ -6,4 +6,5 @@ import lombok.Data;
 public class Request {
     private String text;
     private int shift;
+    private String key;
 }

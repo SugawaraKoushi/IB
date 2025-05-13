@@ -23,8 +23,14 @@ public class EncryptController {
     }
 
     @PostMapping("/multiplicative")
-    public ResponseEntity<String> encryptFromMultiplicativeCipher(@RequestBody Request request) {
+    public ResponseEntity<String> encryptByMultiplicativeCipher(@RequestBody Request request) {
         String result = encryptService.encryptByMultiplicativeCipherWithShift(request.getText(), request.getShift());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/playfair")
+    public ResponseEntity<String> encryptByPlayfairCipher(@RequestBody Request request) {
+        String result = encryptService.encryptByPlayfairCipher(request.getText(), request.getKey());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
