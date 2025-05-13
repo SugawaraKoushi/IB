@@ -27,4 +27,10 @@ public class DecryptController {
         String result = decryptService.decryptFromMultiplicativeCipherWithShift(request.getText(), request.getShift());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/playfair")
+    public ResponseEntity<String> decryptFromPlayfairCipher(@RequestBody Request request) {
+        String result = decryptService.decryptFromPlayfairCipher(request.getText(), request.getKey());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

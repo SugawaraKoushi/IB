@@ -48,8 +48,8 @@ public class EncryptService implements IEncryptService {
         StringBuilder sb = new StringBuilder();
 
         for (String[] bigram : bigrams) {
-            int[] left = getPositionOfSymbol(matrix, bigram[0]);
-            int[] right = getPositionOfSymbol(matrix, bigram[1]);
+            int[] left = getSymbolPosition(matrix, bigram[0]);
+            int[] right = getSymbolPosition(matrix, bigram[1]);
 
             if (left[0] == right[0]) {
                 // Если символы биграммы находятся в одной строке матрицы,
@@ -60,14 +60,14 @@ public class EncryptService implements IEncryptService {
                         .append(matrix[right[0]][(right[1] + 1) % matrix.length]);
             } else if (left[1] == right[1]) {
                 // Если символы биграммы находятся в одном столбце матрицы,
-                // берем символ из соседней правой колонки. Если символ последний -
-                // берем символ из первой колонки
+                // берем символ из соседней нижней строки. Если символ последний -
+                // берем символ из первой строки
 
                 sb.append(matrix[(left[0] + 1) % matrix.length][left[1]])
                         .append(matrix[(right[0] + 1) % matrix.length][right[1]]);
             } else {
                 // Если символы биграммы находятся в разных столбцах и строках,
-                // берем символ из противоположного угла строки символа образуемого прямоугольника
+                // берем символ из противоположного угла строки символа образовавшегося прямоугольника
 
                 sb.append(matrix[left[0]][right[1]]).append(matrix[right[0]][left[1]]);
             }
@@ -142,7 +142,7 @@ public class EncryptService implements IEncryptService {
         return bigrams;
     }
 
-    private int[] getPositionOfSymbol(String[][] matrix, String symbol) {
+    private int[] getSymbolPosition(String[][] matrix, String symbol) {
         int row = -1;
         int column;
 
