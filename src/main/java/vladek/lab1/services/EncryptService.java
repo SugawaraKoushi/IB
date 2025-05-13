@@ -39,7 +39,7 @@ public class EncryptService implements IEncryptService {
     @Override
     public String encryptByPlayfairCipher(String text, String key) {
         // Сформируем матрицу с кодовым слово
-        String[][] matrix = getMatrix(text, key);
+        String[][] matrix = getMatrix(key);
 
         // Разобъем текст на биграммы
         String[][] bigrams = getBigrams(text);
@@ -76,7 +76,7 @@ public class EncryptService implements IEncryptService {
         return sb.toString();
     }
 
-    private String[][] getMatrix(String text, String key) {
+    private String[][] getMatrix(String key) {
         String[][] matrix = new String[6][6];
         int fromAlphabetIndex = 0;
 
