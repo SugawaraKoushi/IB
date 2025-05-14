@@ -44,6 +44,10 @@ public class EncryptService implements IEncryptService {
         // Разобъем текст на биграммы
         String[][] bigrams = getBigrams(text);
 
+        if (bigrams[bigrams.length - 1][1] == null) {
+            bigrams[bigrams.length - 1][1] = "я";
+        }
+
         // Зашифруем текст
         StringBuilder sb = new StringBuilder();
 
@@ -112,9 +116,7 @@ public class EncryptService implements IEncryptService {
         for (int i = 0; i < bigrams.length; i++) {
             bigrams[i][0] = String.valueOf(text.charAt(i * 2));
 
-            if ((i * 2 + 1) >= text.length()) {
-                bigrams[i][1] = "я";
-            } else {
+            if (i * 2 + 1 < text.length()) {
                 bigrams[i][1] = String.valueOf(text.charAt(i * 2 + 1));
             }
         }
