@@ -29,7 +29,8 @@ public class EncryptService implements IEncryptService {
         for (int i = 0; i < text.length(); i++) {
             int newSymbolIndex = ((ALPHABET.indexOf(str.charAt(i))) * shift);
             newSymbolIndex = newSymbolIndex % ALPHABET.length();
-            newSymbolIndex = newSymbolIndex == 0 ? ALPHABET.length() : newSymbolIndex;
+            newSymbolIndex = newSymbolIndex == 0 ? ALPHABET.length() - 1 : newSymbolIndex;
+
             sb.append(ALPHABET.charAt(newSymbolIndex));
         }
 

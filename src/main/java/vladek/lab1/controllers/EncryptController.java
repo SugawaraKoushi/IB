@@ -11,7 +11,7 @@ import vladek.lab1.dto.Request;
 import vladek.lab1.services.IEncryptService;
 
 @RestController
-@RequestMapping("/api/lab1/encrypt")
+@RequestMapping("api/lab1/encrypt")
 public class EncryptController {
     @Autowired
     private IEncryptService encryptService;

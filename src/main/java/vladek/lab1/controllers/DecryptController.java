@@ -11,7 +11,7 @@ import vladek.lab1.dto.Request;
 import vladek.lab1.services.IDecryptService;
 
 @RestController
-@RequestMapping("api/lab1/decrypt")
+@RequestMapping("/api/lab1/decrypt")
 public class DecryptController {
     @Autowired
     private IDecryptService decryptService;
