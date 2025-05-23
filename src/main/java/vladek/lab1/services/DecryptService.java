@@ -25,9 +25,16 @@ public class DecryptService implements IDecryptService {
     public String decryptFromMultiplicativeCipherWithShift(String text, int shift) {
         String str = text.toLowerCase();
         StringBuilder sb = new StringBuilder();
+        int alphabetLen = ALPHABET.length();
+
+        int inverseShift = findMultiplicativeInverse(shift, alphabetLen);
+
+        if (inverseShift == -1) {
+            throw new IllegalArgumentException("Shift " + shift + " не имеет обратного по модулю " + alphabetLen);
+        }
 
         for (int i = 0; i < text.length(); i++) {
-            int newSymbolIndex = ((ALPHABET.indexOf(str.charAt(i))) * shift) % ALPHABET.length();
+            int newSymbolIndex = ((ALPHABET.indexOf(str.charAt(i))) * inverseShift) % (alphabetLen);
             sb.append(ALPHABET.charAt(newSymbolIndex));
         }
 
@@ -112,6 +119,18 @@ public class DecryptService implements IDecryptService {
         } else {
             return sb.toString();
         }
+    }
+
+    private int findMultiplicativeInverse(int a, int m) {
+        a = a % m;
+
+        for (int x = 1; x < m; x++) {
+            if ((a * x) % m == 1) {
+                return x;
+            }
+        }
+
+        return -1;
     }
 
     private int getSymbolPosition(int pos, int shift) {

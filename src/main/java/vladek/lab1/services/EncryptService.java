@@ -25,12 +25,10 @@ public class EncryptService implements IEncryptService {
     public String encryptByMultiplicativeCipherWithShift(String text, int shift) {
         String str = text.toLowerCase();
         StringBuilder sb = new StringBuilder();
+        int alphabetLen = ALPHABET.length();
 
         for (int i = 0; i < text.length(); i++) {
-            int newSymbolIndex = ((ALPHABET.indexOf(str.charAt(i))) * shift);
-            newSymbolIndex = newSymbolIndex % ALPHABET.length();
-            newSymbolIndex = newSymbolIndex == 0 ? ALPHABET.length() - 1 : newSymbolIndex;
-
+            int newSymbolIndex = ((ALPHABET.indexOf(str.charAt(i))) * shift) % alphabetLen;
             sb.append(ALPHABET.charAt(newSymbolIndex));
         }
 
