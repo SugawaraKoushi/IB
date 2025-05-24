@@ -21,4 +21,10 @@ public class DecryptController {
         String result = decryptService.decryptFromRailFenceCipher(request.getText());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/with-key")
+    public ResponseEntity<String> decryptFromChangeCipherWithKey(@RequestBody Request request) {
+        String result = decryptService.decryptFromChangeCipherWithKey(request.getText(), request.getKey());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

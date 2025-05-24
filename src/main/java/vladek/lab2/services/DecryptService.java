@@ -2,6 +2,9 @@ package vladek.lab2.services;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 @Service("decryptService2")
 public class DecryptService implements IDecryptService {
     private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя_,.АБВГДЦЕЁЖЗИЙКЛМНОПРСТУФХЦШЩЭЮЯ";
@@ -18,6 +21,26 @@ public class DecryptService implements IDecryptService {
             if (i < part2.length()) {
                 sb.append(part2.charAt(i));
             }
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public String decryptFromChangeCipherWithKey(String text, String key) {
+        StringBuilder sb = new StringBuilder();
+        int groupLen = key.length();
+
+        for (int i = 0; i < text.length(); i += groupLen) {
+            String group = text.substring(i, Math.min(i + groupLen, text.length()));
+            String[] groupSymbols = new String[group.length()];
+
+            for (int j = 0; j < groupSymbols.length; j++) {
+                int keyIndex = Integer.parseInt(String.valueOf(key.charAt(j))) - 1;
+                groupSymbols[keyIndex] = String.valueOf(group.charAt(j));
+            }
+
+            sb.append(String.join("", groupSymbols));
         }
 
         return sb.toString();
