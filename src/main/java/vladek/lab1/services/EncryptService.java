@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
-@Service
+@Service("encryptService1")
 public class EncryptService implements IEncryptService {
     private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя_,.";
 

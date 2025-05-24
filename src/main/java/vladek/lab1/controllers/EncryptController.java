@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import vladek.lab1.dto.Request;
 import vladek.lab1.services.IEncryptService;
 
-@RestController
+@RestController("encryptController1")
 @RequestMapping("api/lab1/encrypt")
 public class EncryptController {
     @Autowired
