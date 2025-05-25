@@ -58,12 +58,10 @@ public class EncryptService implements IEncryptService {
 
         String[][] scrambledtable = new String[table.length][table[0].length];
 
-        // Меняем местами колонки согласно ключу
+        // Поменяем местами колонки согласно ключу
         for (int i = 0; i < scrambledtable.length; i++) {
             for (int j = 0; j < scrambledtable[i].length; j++) {
                 int keyPos = Character.getNumericValue(key.charAt(j));
-                String ch = table[i][j];
-
                 scrambledtable[i][j] = table[i][keyPos - 1];
             }
         }
@@ -71,7 +69,8 @@ public class EncryptService implements IEncryptService {
         // Формируем строку
         for (int i = 0; i < scrambledtable[0].length; i++) {
             for (int j = 0; j < scrambledtable.length; j++) {
-                sb.append(scrambledtable[j][i]);
+                String ch = scrambledtable[j][i] == null ? "_" : scrambledtable[j][i];
+                sb.append(ch);
             }
         }
 

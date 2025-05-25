@@ -27,4 +27,10 @@ public class DecryptController {
         String result = decryptService.decryptFromChangeCipherWithKey(request.getText(), request.getKey());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/combine")
+    public ResponseEntity<String> decryptFromCombineChangeCipherWithKey(@RequestBody Request request) {
+        String result = decryptService.decryptFromCombineChangeCipherWithKey(request.getText(), request.getKey());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

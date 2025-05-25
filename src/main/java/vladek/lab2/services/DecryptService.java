@@ -42,4 +42,38 @@ public class DecryptService implements IDecryptService {
 
         return sb.toString();
     }
+
+    @Override
+    public String decryptFromCombineChangeCipherWithKey(String text, String key) {
+        StringBuilder sb = new StringBuilder();
+        int rows = (int) Math.ceil((double) text.length() / key.length());
+        String[][] scrambleTable = new String[rows][key.length()];
+
+        // Преобразуем текст в таблицу, заполняя его по столбцам
+        for (int i = 0; i < scrambleTable[0].length; i++) {
+            for (int j = 0; j < scrambleTable.length; j++) {
+                int index = i * rows + j;
+                scrambleTable[j][i] = String.valueOf(text.charAt(index));
+            }
+        }
+
+        String[][] table = new String[scrambleTable.length][scrambleTable[0].length];
+
+        // Поменяем местами столбцы согласно ключу
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[i].length; j++) {
+                int keyPos = Character.getNumericValue(key.charAt(j));
+                table[i][keyPos - 1] = scrambleTable[i][j];
+            }
+        }
+
+        // Формируем строку
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[i].length; j++) {
+                sb.append(table[i][j]);
+            }
+        }
+
+         return sb.toString();
+    }
 }
