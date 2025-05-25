@@ -2,9 +2,6 @@ package vladek.lab2.services;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 @Service("decryptService2")
 public class DecryptService implements IDecryptService {
     private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя_,.АБВГДЦЕЁЖЗИЙКЛМНОПРСТУФХЦШЩЭЮЯ";

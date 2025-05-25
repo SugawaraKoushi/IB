@@ -8,7 +8,7 @@ public class EncryptService implements IEncryptService {
 
     @Override
     public String encryptByRailFenceCipher(String text) {
-        String[] railFence = new String[] {"", ""};
+        String[] railFence = new String[]{"", ""};
 
         for (int i = 0; i < text.length(); i++) {
             if (i % 2 == 0) {
@@ -23,7 +23,7 @@ public class EncryptService implements IEncryptService {
 
     @Override
     public String encryptByChangeCipherWithKey(String text, String key) {
-        StringBuilder result = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         int groupSize = key.length();
 
         for (int i = 0; i < text.length(); i += groupSize) {
@@ -32,11 +32,49 @@ public class EncryptService implements IEncryptService {
             for (int keyPos : key.chars().map(Character::getNumericValue).toArray()) {
                 int charIndex = keyPos - 1;
                 if (charIndex < group.length()) {
-                    result.append(group.charAt(charIndex));
+                    sb.append(group.charAt(charIndex));
                 }
             }
         }
 
-        return result.toString();
+        return sb.toString();
+    }
+
+    @Override
+    public String encryptByCombineChangeCipherWithKey(String text, String key) {
+        StringBuilder sb = new StringBuilder();
+        int rows = (int) Math.ceil((double) text.length() / key.length());
+        String[][] table = new String[rows][key.length()];
+        int rowSize = key.length();
+
+        // Заполняем таблицу построчно
+        for (int i = 0; i < text.length(); i += rowSize) {
+            String row = text.substring(i, Math.min(i + rowSize, text.length()));
+
+            for (int j = 0; j < row.length(); j++) {
+                table[i / rowSize][j] = String.valueOf(row.charAt(j));
+            }
+        }
+
+        String[][] scrambledtable = new String[table.length][table[0].length];
+
+        // Меняем местами колонки согласно ключу
+        for (int i = 0; i < scrambledtable.length; i++) {
+            for (int j = 0; j < scrambledtable[i].length; j++) {
+                int keyPos = Character.getNumericValue(key.charAt(j));
+                String ch = table[i][j];
+
+                scrambledtable[i][j] = table[i][keyPos - 1];
+            }
+        }
+
+        // Формируем строку
+        for (int i = 0; i < scrambledtable[0].length; i++) {
+            for (int j = 0; j < scrambledtable.length; j++) {
+                sb.append(scrambledtable[j][i]);
+            }
+        }
+
+        return sb.toString();
     }
 }

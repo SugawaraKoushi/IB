@@ -23,9 +23,14 @@ public class EncryptController {
     }
 
     @PostMapping("/with-key")
-    public ResponseEntity<String> ecnryptByChangeCipherWithKey(@RequestBody Request request) {
+    public ResponseEntity<String> encryptByChangeCipherWithKey(@RequestBody Request request) {
         String result = encryptService.encryptByChangeCipherWithKey(request.getText(), request.getKey());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PostMapping("/combine")
+    public ResponseEntity<String> encryptByCombineChangeCipherWithKey(@RequestBody Request request) {
+        String result = encryptService.encryptByCombineChangeCipherWithKey(request.getText(), request.getKey());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }
