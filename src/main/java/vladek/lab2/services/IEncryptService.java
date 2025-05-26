@@ -4,4 +4,5 @@ public interface IEncryptService {
     String encryptByRailFenceCipher(String text);
     String encryptByChangeCipherWithKey(String text, String key);
     String encryptByCombineChangeCipherWithKey(String text, String key);
+    String encryptByDoubleChangeCipherWithKey(String text, String[] keys);
 }

@@ -24,13 +24,19 @@ public class EncryptController {
 
     @PostMapping("/with-key")
     public ResponseEntity<String> encryptByChangeCipherWithKey(@RequestBody Request request) {
-        String result = encryptService.encryptByChangeCipherWithKey(request.getText(), request.getKey());
+        String result = encryptService.encryptByChangeCipherWithKey(request.getText(), request.getKeys()[0]);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping("/combine")
     public ResponseEntity<String> encryptByCombineChangeCipherWithKey(@RequestBody Request request) {
-        String result = encryptService.encryptByCombineChangeCipherWithKey(request.getText(), request.getKey());
+        String result = encryptService.encryptByCombineChangeCipherWithKey(request.getText(), request.getKeys()[0]);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/double")
+    public ResponseEntity<String> decryptFromDoubleChangeCipherWithKey(@RequestBody Request request) {
+        String result = encryptService.encryptByDoubleChangeCipherWithKey(request.getText(), request.getKeys());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

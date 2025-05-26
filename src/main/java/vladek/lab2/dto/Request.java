@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class Request {
     private String text;
-    private String key;
+    private String[] keys;
 }

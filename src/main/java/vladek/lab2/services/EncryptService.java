@@ -28,12 +28,21 @@ public class EncryptService implements IEncryptService {
 
         for (int i = 0; i < text.length(); i += groupSize) {
             String group = text.substring(i, Math.min(i + groupSize, text.length()));
+            String[] groupSymbols = new String[key.length()];
 
-            for (int keyPos : key.chars().map(Character::getNumericValue).toArray()) {
-                int charIndex = keyPos - 1;
-                if (charIndex < group.length()) {
-                    sb.append(group.charAt(charIndex));
+            for (int j = 0; j < key.length(); j++) {
+                int keyIndex = Character.getNumericValue(key.charAt(j)) - 1;
+
+                if (keyIndex > group.length() - 1) {
+                    groupSymbols[j] = "_";
+                } else {
+                    groupSymbols[j] = String.valueOf(group.charAt(keyIndex));
                 }
+            }
+
+            for (String symbol : groupSymbols) {
+                String ch = symbol == null ? "_" : symbol;
+                sb.append(ch);
             }
         }
 
@@ -75,5 +84,16 @@ public class EncryptService implements IEncryptService {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public String encryptByDoubleChangeCipherWithKey(String text, String[] keys) {
+        String result = text;
+
+        for (String key : keys) {
+            result = encryptByChangeCipherWithKey(result, key);
+        }
+
+        return result;
     }
 }

@@ -30,14 +30,23 @@ public class DecryptService implements IDecryptService {
 
         for (int i = 0; i < text.length(); i += groupLen) {
             String group = text.substring(i, Math.min(i + groupLen, text.length()));
-            String[] groupSymbols = new String[group.length()];
+            String[] groupSymbols = new String[key.length()];
+            int diff = key.length() - group.length();
 
             for (int j = 0; j < groupSymbols.length; j++) {
-                int keyIndex = Integer.parseInt(String.valueOf(key.charAt(j))) - 1;
-                groupSymbols[keyIndex] = String.valueOf(group.charAt(j));
+                int keyIndex = Character.getNumericValue(key.charAt(j)) - 1;
+
+                if (j > group.length() - 1) {
+                    groupSymbols[keyIndex] = "_";
+                } else {
+                    groupSymbols[keyIndex] = String.valueOf(group.charAt(j));
+                }
             }
 
-            sb.append(String.join("", groupSymbols));
+            for (String symbol : groupSymbols) {
+                String ch = symbol == null ? "_" : symbol;
+                sb.append(ch);
+            }
         }
 
         return sb.toString();
@@ -74,6 +83,17 @@ public class DecryptService implements IDecryptService {
             }
         }
 
-         return sb.toString();
+        return sb.toString();
+    }
+
+    @Override
+    public String decryptFromDoubleChangeCipherWithKey(String text, String[] keys) {
+        String result = text;
+
+        for (int i = keys.length - 1; i >= 0; i--) {
+            result = decryptFromChangeCipherWithKey(result, keys[i]);
+        }
+
+        return result;
     }
 }

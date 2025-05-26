@@ -24,13 +24,19 @@ public class DecryptController {
 
     @PostMapping("/with-key")
     public ResponseEntity<String> decryptFromChangeCipherWithKey(@RequestBody Request request) {
-        String result = decryptService.decryptFromChangeCipherWithKey(request.getText(), request.getKey());
+        String result = decryptService.decryptFromChangeCipherWithKey(request.getText(), request.getKeys()[0]);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping("/combine")
     public ResponseEntity<String> decryptFromCombineChangeCipherWithKey(@RequestBody Request request) {
-        String result = decryptService.decryptFromCombineChangeCipherWithKey(request.getText(), request.getKey());
+        String result = decryptService.decryptFromCombineChangeCipherWithKey(request.getText(), request.getKeys()[0]);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/double")
+    public ResponseEntity<String> decryptFromDoubleChangeCipherWithKey(@RequestBody Request request) {
+        String result = decryptService.decryptFromDoubleChangeCipherWithKey(request.getText(), request.getKeys());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
