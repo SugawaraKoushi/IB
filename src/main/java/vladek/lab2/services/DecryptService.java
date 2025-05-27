@@ -62,7 +62,7 @@ public class DecryptService implements IDecryptService {
         for (int i = 0; i < scrambleTable[0].length; i++) {
             for (int j = 0; j < scrambleTable.length; j++) {
                 int index = i * rows + j;
-                scrambleTable[j][i] = String.valueOf(text.charAt(index));
+                scrambleTable[j][i] = index < text.length() ? String.valueOf(text.charAt(index)) : "_";
             }
         }
 
