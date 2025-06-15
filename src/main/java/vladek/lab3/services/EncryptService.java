@@ -2,6 +2,7 @@ package vladek.lab3.services;
 
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -34,6 +35,7 @@ public class EncryptService implements IEncryptService {
 
         // 1. Нормализация текста, чтобы было кратно 16 байтам. Возможно стоит заложить длину текста к закодированную штуку
         int[] textWords = normalizeText(text);
+        int[] encodedTextWords = new int[textWords.length];
 
         // 2. Нормализовать ключ, приведя его к 128 битам (16 байтам)
         int[] keyWords = normalizeKey(key);
@@ -47,34 +49,39 @@ public class EncryptService implements IEncryptService {
             int[][] keys = expandKeys(keyWords);
 
             // Не будем преобразовывать шифруемые 16 байт в массив 4 на 4, т.к. в каждом элементе state
-            // хранится по 4 байта (4 пары 16-ричных цифр), и их можно спокойно считывать последовательно.
-            // По сути своей каждый элемент state это столбец матрицы состояний
+            // хранится по 4 байта (4 пары 16-ричных цифр), и их можно считывать последовательно.
+            // По сути своей каждый элемент state это столбец матрицы состояний.
+            // Для вычисления значения в "ячейке", можно использовать побитовые сдвиги и умножение
 
-            // 4. Начальное преобразование AddRoundKey state xor первый_ключ
+            // 4. Начальное преобразование AddRoundKey (state xor первый_ключ)
             state = addRoundKey(state, keys[0]);
 
             // 5. Начало 9 основных раундов
-            for (int j = 1; j < key.length() - 1; j++) {
+            for (int j = 1; j <= 9; j++) {
                 // - SubBytes заменяем по SBOXE
                 state = subBytes(state);
 
                 // - ShiftRows сдвиг строк
+                state = shiftRows(state);
 
                 // - MixColumns перемешиваем строки
-                // - преобразование AddRoundKey State xor i-тый_ключ
+                state = mixColumns(state);
+
+                // - Преобразование AddRoundKey (State xor i-тый_ключ)
+                state = addRoundKey(state, keys[i]);
             }
+
+            // 6. Финальный раунд SubBytes -> ShiftRows -> AddRoundKey
+            state = subBytes(state);
+            state = shiftRows(state);
+            state = addRoundKey(state, keys[10]);
+
+            // 7. добавить зашифрованный текст в буфер
+            System.arraycopy(state, 0, encodedTextWords, i, 4);
         }
 
-
-
-
-
-
-
-
-        // 6. SubBytes -> ShiftRows -> AddRoundKey
-        // 7. Преобразовать текст из байтов в текст
-        return "";
+        // 8. Преобразовать текст из интов в текст
+        return intArrayToString(encodedTextWords);
     }
 
     /**
@@ -216,6 +223,7 @@ public class EncryptService implements IEncryptService {
 
     /**
      * Преобразует матрицу состояний по SBOXE
+     *
      * @param state матрица состояний
      * @return преобразованная матрица
      */
@@ -228,4 +236,122 @@ public class EncryptService implements IEncryptService {
 
         return result;
     }
+
+    /**
+     * Преобразует матрицу состоянию, сдвигая каждую ее строку циклическим сдвигом влево.
+     * Первая строка не сдвигается.
+     * Вторая сдвигается на 1.
+     * Третья сдвигается на 2.
+     * Четвертая сдвигается на 3.
+     *
+     * @param state матрица состояний
+     * @return преобразованная матрица состояний
+     */
+    private int[] shiftRows(int[] state) {
+        int[] result = new int[4];
+        System.arraycopy(state, 0, result, 0, 4);
+
+        for (int i = 0; i < 4; i++) {
+            int p0 = (state[i] >> 24) & 0xFF;
+            int p1 = (state[(i + 1) % 4] >> 16) & 0xFF;
+            int p2 = (state[(i + 2) % 4] >> 8) & 0xFF;
+            int p3 = state[(i + 3) % 4] & 0xFF;
+            result[i] = ((p0 << 24) | (p1 << 16) | (p2 << 8) | p3);
+        }
+
+        return result;
+    }
+
+    /**
+     * Преобразует матрицу состояний умножая ее на квадратную матрицу констант
+     *
+     * @param state матрица состояний
+     * @return преобразованная матрица состояний
+     */
+    private int[] mixColumns(int[] state) {
+        int[] result = new int[4];
+
+        for (int i = 0; i < 4; i++) {
+            // Разбиваем строку по 2 байта
+            int s0 = (state[i] >> 24) & 0xFF;
+            int s1 = (state[i] >> 16) & 0xFF;
+            int s2 = (state[i] >> 8) & 0xFF;
+            int s3 = state[i] & 0xFF;
+
+            // Умножаем на квадратную матрицу
+            int res0 = multiplyBy02(s0) ^ multiplyBy03(s1) ^ s2 ^ s3;
+            int res1 = s0 ^ multiplyBy02(s1) ^ multiplyBy03(s2) ^ s3;
+            int res2 = s0 ^ s1 ^ multiplyBy02(s2) ^ multiplyBy03(s3);
+            int res3 = multiplyBy03(s0) ^ s1 ^ s2 ^ multiplyBy02(s3);
+
+            result[i] = ((res0 << 24) | (res1 << 16) | (res2 << 8) | res3);
+        }
+
+        return result;
+    }
+
+    /**
+     * Умножение на 0x02 в поле Галуа
+     *
+     * @param t число
+     * @return результат умножения числа на 0x02 в поле Галуа
+     */
+    private int multiplyBy02(int t) {
+        int result = t << 1;
+
+        if ((result & 0x100) != 0) {
+            result ^= 0x1B;
+        }
+
+        return result & 0xFF;
+    }
+
+    /**
+     * Умножение на 0x03 в поле Галуа
+     *
+     * @param t число
+     * @return результат умножения числа на 0x03 в поле Галуа
+     */
+    private int multiplyBy03(int t) {
+        return multiplyBy02(t) ^ t;
+    }
+
+    /**
+     * Преобразует массив int[] в строку
+     *
+     * @param intArray массив int'ов
+     * @return строка
+     */
+    private String intArrayToString(int[] intArray) {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+
+        for (int value : intArray) {
+            byte[] bytes = intToBytes(value);
+            byteStream.write(bytes, 0, bytes.length);
+        }
+
+        return byteStream.toString(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Преобразует int в массив из 4 байт
+     */
+    private byte[] intToBytes(int value) {
+        return new byte[]{
+                (byte) (value >>> 24),
+                (byte) (value >>> 16),
+                (byte) (value >>> 8),
+                (byte) value
+        };
+    }
+
+//    public static void main(String[] args) {
+//        int[] a = new int[] {0xd4bf5d30, 0xe0b452ae, 0xb84111f1, 0x1e2798e5};
+//
+//        a = mixColumns(a);
+//
+//        for (int b : a) {
+//            System.out.printf("%x%n", b);
+//        }
+//    }
 }
