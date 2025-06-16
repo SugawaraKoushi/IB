@@ -3,8 +3,10 @@ package vladek.lab3.services;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 
 @Service
 public class EncryptService implements IEncryptService {
@@ -100,7 +102,7 @@ public class EncryptService implements IEncryptService {
             bytes = withZeros;
         }
 
-        int[] result = new int[bytes.length / 16];
+        int[] result = new int[bytes.length / 8];
 
         for (int i = 0; i < result.length; i++) {
             byte[] temp = new byte[4];
@@ -323,14 +325,13 @@ public class EncryptService implements IEncryptService {
      * @return строка
      */
     private String intArrayToString(int[] intArray) {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ByteBuffer buffer = ByteBuffer.allocate(intArray.length * 4);
 
         for (int value : intArray) {
-            byte[] bytes = intToBytes(value);
-            byteStream.write(bytes, 0, bytes.length);
+            buffer.putInt(value);
         }
 
-        return byteStream.toString(StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(buffer.array());
     }
 
     /**
@@ -344,14 +345,4 @@ public class EncryptService implements IEncryptService {
                 (byte) value
         };
     }
-
-//    public static void main(String[] args) {
-//        int[] a = new int[] {0xd4bf5d30, 0xe0b452ae, 0xb84111f1, 0x1e2798e5};
-//
-//        a = mixColumns(a);
-//
-//        for (int b : a) {
-//            System.out.printf("%x%n", b);
-//        }
-//    }
 }
