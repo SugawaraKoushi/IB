@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
+
+import static vladek.lab3.helpers.AES128Helper.*;
 
 @Service
 public class EncryptService implements IEncryptService {
@@ -42,13 +43,13 @@ public class EncryptService implements IEncryptService {
         // 2. Нормализовать ключ, приведя его к 128 битам (16 байтам)
         int[] keyWords = normalizeKey(key);
 
+        // 3. Сформировать ключи для раундов, их на 1 больше, чем самих раундов. Всего раундов 10
+        int[][] keys = expandKeys(keyWords);
+
         // Шифруем каждые 16 байт текста
         for (int i = 0; i < textWords.length; i += 4) {
             int[] state = new int[4];
             System.arraycopy(textWords, i, state, 0, 4);
-
-            // 3. Сформировать ключи для раундов, их на 1 больше, чем самих раундов. Всего раундов 10
-            int[][] keys = expandKeys(keyWords);
 
             // Не будем преобразовывать шифруемые 16 байт в массив 4 на 4, т.к. в каждом элементе state
             // хранится по 4 байта (4 пары 16-ричных цифр), и их можно считывать последовательно.
@@ -83,7 +84,7 @@ public class EncryptService implements IEncryptService {
         }
 
         // 8. Преобразовать текст из интов в текст
-        return intArrayToString(encodedTextWords);
+        return intArrayToBase64String(encodedTextWords);
     }
 
     /**
@@ -113,210 +114,7 @@ public class EncryptService implements IEncryptService {
         return result;
     }
 
-    /**
-     * Нормализует ключ, добавляя в него лишние 0 или обрезая длину, чтобы тот был равен 128 битам
-     *
-     * @param key текстовый ключ
-     * @return 128 битовый ключ
-     */
-    private int[] normalizeKey(String key) {
-        byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
-        if (bytes.length != 16) bytes = Arrays.copyOf(bytes, 16);
-        int[] result = new int[4];
 
-        for (int i = 0; i < result.length; i++) {
-            byte[] temp = new byte[4];
-            System.arraycopy(bytes, 4 * i, temp, 0, 4);
-            result[i] = bytesToInt(temp);
-        }
-
-        return result;
-    }
-
-    /**
-     * Преобразует последовательность из 4-х байтов в слово
-     *
-     * @param bytes - 4 байта
-     * @return слово
-     */
-    private int bytesToInt(byte[] bytes) {
-        return ((bytes[0] & 0xFF) << 24) |  // сдвигаем на первый байт
-                ((bytes[1] & 0xFF) << 16) | // сдвигаем на второй байт
-                ((bytes[2] & 0xFF) << 8) |  // сдвигаем на третий байт
-                (bytes[3] & 0xFF);          // оставляем на четвертом байте и все соединяем между собой
-    }
-
-    /**
-     * Порождает 11 16-байтовых ключей
-     *
-     * @param key исходный 16-байтовый ключ
-     * @return 11 16-байтовых ключей для раундов шифрования
-     */
-    private int[][] expandKeys(int[] key) {
-        int[] keysWords = new int[44];
-        System.arraycopy(key, 0, keysWords, 0, 4);
-
-        for (int i = 4; i < keysWords.length; i++) {
-            if (i % 4 == 0) {
-                keysWords[i] = keysWords[i - 1] ^ keysWords[i - 4];
-            } else {
-                int t = subWord(rotWord(keysWords[i - 1])) ^ RCON[i / 4 - 1];
-                keysWords[i] = t ^ keysWords[i - 4];
-            }
-        }
-
-        int[][] keys = new int[11][4];
-
-        for (int i = 0; i < keys.length; i++) {
-            for (int j = 0; j < keys[i].length; j++) {
-                keys[i][j] = keysWords[i * keys[i].length + j];
-            }
-        }
-
-        return keys;
-    }
-
-    /**
-     * Циклический сдвиг слова влево на 1 байт
-     *
-     * @param word слово
-     * @return преобразованное слово
-     */
-    private int rotWord(int word) {
-        return ((word << 8) | (word & 0xFF000000 >> 24));
-    }
-
-    /**
-     * Преобразует слово по таблице SBOXE
-     *
-     * @param word слово
-     * @return преобразованное слово
-     */
-    private int subWord(int word) {
-        int b0 = (word >> 28) & 0xF;
-        int b1 = (word >> 24) & 0xF;
-
-        int b2 = (word >> 20) & 0xF;
-        int b3 = (word >> 16) & 0xF;
-
-        int b4 = (word >> 12) & 0xF;
-        int b5 = (word >> 8) & 0xF;
-
-        int b6 = (word >> 4) & 0xF;
-        int b7 = word & 0xF;
-
-        int sb0 = SBOXE[b0][b1];
-        int sb1 = SBOXE[b2][b3];
-        int sb2 = SBOXE[b4][b5];
-        int sb3 = SBOXE[b6][b7];
-
-        return ((sb0 << 24) | (sb1 << 16) | (sb2 << 8) | sb3);
-    }
-
-    private int[] addRoundKey(int[] word, int[] key) {
-        int[] result = new int[4];
-
-        for (int i = 0; i < 4; i++) {
-            result[i] = key[i] ^ word[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Преобразует матрицу состояний по SBOXE
-     *
-     * @param state матрица состояний
-     * @return преобразованная матрица
-     */
-    private int[] subBytes(int[] state) {
-        int[] result = new int[4];
-
-        for (int i = 0; i < 4; i++) {
-            result[i] = subWord(state[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Преобразует матрицу состоянию, сдвигая каждую ее строку циклическим сдвигом влево.
-     * Первая строка не сдвигается.
-     * Вторая сдвигается на 1.
-     * Третья сдвигается на 2.
-     * Четвертая сдвигается на 3.
-     *
-     * @param state матрица состояний
-     * @return преобразованная матрица состояний
-     */
-    private int[] shiftRows(int[] state) {
-        int[] result = new int[4];
-        System.arraycopy(state, 0, result, 0, 4);
-
-        for (int i = 0; i < 4; i++) {
-            int p0 = (state[i] >> 24) & 0xFF;
-            int p1 = (state[(i + 1) % 4] >> 16) & 0xFF;
-            int p2 = (state[(i + 2) % 4] >> 8) & 0xFF;
-            int p3 = state[(i + 3) % 4] & 0xFF;
-            result[i] = ((p0 << 24) | (p1 << 16) | (p2 << 8) | p3);
-        }
-
-        return result;
-    }
-
-    /**
-     * Преобразует матрицу состояний умножая ее на квадратную матрицу констант
-     *
-     * @param state матрица состояний
-     * @return преобразованная матрица состояний
-     */
-    private int[] mixColumns(int[] state) {
-        int[] result = new int[4];
-
-        for (int i = 0; i < 4; i++) {
-            // Разбиваем строку по 2 байта
-            int s0 = (state[i] >> 24) & 0xFF;
-            int s1 = (state[i] >> 16) & 0xFF;
-            int s2 = (state[i] >> 8) & 0xFF;
-            int s3 = state[i] & 0xFF;
-
-            // Умножаем на квадратную матрицу
-            int res0 = multiplyBy02(s0) ^ multiplyBy03(s1) ^ s2 ^ s3;
-            int res1 = s0 ^ multiplyBy02(s1) ^ multiplyBy03(s2) ^ s3;
-            int res2 = s0 ^ s1 ^ multiplyBy02(s2) ^ multiplyBy03(s3);
-            int res3 = multiplyBy03(s0) ^ s1 ^ s2 ^ multiplyBy02(s3);
-
-            result[i] = ((res0 << 24) | (res1 << 16) | (res2 << 8) | res3);
-        }
-
-        return result;
-    }
-
-    /**
-     * Умножение на 0x02 в поле Галуа
-     *
-     * @param t число
-     * @return результат умножения числа на 0x02 в поле Галуа
-     */
-    private int multiplyBy02(int t) {
-        int result = t << 1;
-
-        if ((result & 0x100) != 0) {
-            result ^= 0x1B;
-        }
-
-        return result & 0xFF;
-    }
-
-    /**
-     * Умножение на 0x03 в поле Галуа
-     *
-     * @param t число
-     * @return результат умножения числа на 0x03 в поле Галуа
-     */
-    private int multiplyBy03(int t) {
-        return multiplyBy02(t) ^ t;
-    }
 
     /**
      * Преобразует массив int[] в строку
@@ -324,25 +122,14 @@ public class EncryptService implements IEncryptService {
      * @param intArray массив int'ов
      * @return строка
      */
-    private String intArrayToString(int[] intArray) {
-        ByteBuffer buffer = ByteBuffer.allocate(intArray.length * 4);
+    private String intArrayToBase64String(int[] intArray) {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
         for (int value : intArray) {
-            buffer.putInt(value);
+            byte[] bytes = intToBytes(value);
+            byteStream.write(bytes, 0, bytes.length);
         }
 
-        return Base64.getEncoder().encodeToString(buffer.array());
-    }
-
-    /**
-     * Преобразует int в массив из 4 байт
-     */
-    private byte[] intToBytes(int value) {
-        return new byte[]{
-                (byte) (value >>> 24),
-                (byte) (value >>> 16),
-                (byte) (value >>> 8),
-                (byte) value
-        };
+        return byteStream.toString(StandardCharsets.UTF_8);
     }
 }
