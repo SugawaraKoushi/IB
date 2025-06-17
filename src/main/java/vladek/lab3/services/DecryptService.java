@@ -76,10 +76,18 @@ public class DecryptService implements IDecryptService {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
         for (int value : intArray) {
-            byte[] bytes = intToBytes(value);
-            byteStream.write(bytes, 0, bytes.length);
+            byteStream.write(intToBytes(value), 0, 4);
         }
 
-        return byteStream.toString(StandardCharsets.UTF_8);
+        byte[] bytes = byteStream.toByteArray();
+
+        // обрезаем нули в конце
+        int length = bytes.length;
+
+        while (length > 0 && bytes[length - 1] == 0) {
+            length--;
+        }
+
+        return new String(bytes, 0, length, StandardCharsets.UTF_8);
     }
 }

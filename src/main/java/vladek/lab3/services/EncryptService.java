@@ -103,7 +103,7 @@ public class EncryptService implements IEncryptService {
             bytes = withZeros;
         }
 
-        int[] result = new int[bytes.length / 8];
+        int[] result = new int[bytes.length / 4];
 
         for (int i = 0; i < result.length; i++) {
             byte[] temp = new byte[4];
