@@ -258,11 +258,11 @@ public class AES128Helper {
         int[] result = new int[4];
         System.arraycopy(state, 0, result, 0, 4);
 
-        for (int i = 3; i >= 0; i--) {
+        for (int i = 0; i < 4; i++) {
             int p0 = (state[i] >> 24) & 0xFF;
-            int p1 = (state[(i - 1) % 4] >> 16) & 0xFF;
-            int p2 = (state[(i - 2) % 4] >> 8) & 0xFF;
-            int p3 = state[(i - 3) % 4] & 0xFF;
+            int p1 = (state[(i + 3) % 4] >> 16) & 0xFF;
+            int p2 = (state[(i + 2) % 4] >> 8) & 0xFF;
+            int p3 = (state[(i + 1) % 4]) & 0xFF;
             result[i] = ((p0 << 24) | (p1 << 16) | (p2 << 8) | p3);
         }
 
