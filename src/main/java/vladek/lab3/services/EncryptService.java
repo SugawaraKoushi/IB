@@ -71,7 +71,7 @@ public class EncryptService implements IEncryptService {
                 state = mixColumns(state);
 
                 // - Преобразование AddRoundKey (State xor i-тый_ключ)
-                state = addRoundKey(state, keys[i]);
+                state = addRoundKey(state, keys[j]);
             }
 
             // 6. Финальный раунд SubBytes -> ShiftRows -> AddRoundKey

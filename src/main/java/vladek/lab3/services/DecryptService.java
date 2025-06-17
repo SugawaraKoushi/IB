@@ -27,7 +27,7 @@ public class DecryptService implements IDecryptService {
 
             for (int j = 9; j >= 1; j--) {
                 // - Преобразование AddRoundKey (State xor i-тый_ключ)
-                state = addRoundKey(state, keys[i]);
+                state = addRoundKey(state, keys[j]);
 
                 // - MixColumns перемешиваем строки
                 state = invMixColumns(state);
