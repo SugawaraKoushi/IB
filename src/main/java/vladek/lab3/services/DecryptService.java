@@ -26,6 +26,9 @@ public class DecryptService implements IDecryptService {
             state = invSubBytes(state);
 
             for (int j = 9; j >= 1; j--) {
+                // - Преобразование AddRoundKey (State xor i-тый_ключ)
+                state = addRoundKey(state, keys[i]);
+
                 // - MixColumns перемешиваем строки
                 state = invMixColumns(state);
 
@@ -34,9 +37,6 @@ public class DecryptService implements IDecryptService {
 
                 // - SubBytes заменяем по SBOXE
                 state = invSubBytes(state);
-
-                // - Преобразование AddRoundKey (State xor i-тый_ключ)
-                state = addRoundKey(state, keys[i]);
             }
 
             state = addRoundKey(state, keys[0]);
@@ -55,7 +55,7 @@ public class DecryptService implements IDecryptService {
      */
     private int[] base64StringToIntArray(String text) {
         byte[] bytes = Base64.getDecoder().decode(text);
-        int[] result = new int[bytes.length / 8];
+        int[] result = new int[bytes.length / 4];
 
         for (int i = 0; i < result.length; i++) {
             byte[] temp = new byte[4];
@@ -68,6 +68,7 @@ public class DecryptService implements IDecryptService {
 
     /**
      * Преобразует массив 4-байтовых слов в текст в кодировке UTF-8
+     *
      * @param intArray массив 4-байтовых слов
      * @return текст
      */
