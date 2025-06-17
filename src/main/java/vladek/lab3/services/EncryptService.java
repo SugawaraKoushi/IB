@@ -123,13 +123,12 @@ public class EncryptService implements IEncryptService {
      * @return строка
      */
     private String intArrayToBase64String(int[] intArray) {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ByteBuffer buffer = ByteBuffer.allocate(intArray.length * 4);
 
         for (int value : intArray) {
-            byte[] bytes = intToBytes(value);
-            byteStream.write(bytes, 0, bytes.length);
+            buffer.putInt(value);
         }
 
-        return byteStream.toString(StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(buffer.array());
     }
 }
