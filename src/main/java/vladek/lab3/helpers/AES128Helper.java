@@ -44,39 +44,6 @@ public class AES128Helper {
             0x40000000, 0x80000000, 0x1B000000, 0x36000000};
 
     /**
-     * Нормализует ключ, добавляя в него лишние 0 или обрезая длину, чтобы тот был равен 128 битам
-     *
-     * @param key текстовый ключ
-     * @return 128 битовый ключ
-     */
-    public static int[] normalizeKey(String key) {
-        byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
-        if (bytes.length != 16) bytes = Arrays.copyOf(bytes, 16);
-        int[] result = new int[4];
-
-        for (int i = 0; i < result.length; i++) {
-            byte[] temp = new byte[4];
-            System.arraycopy(bytes, 4 * i, temp, 0, 4);
-            result[i] = bytesToInt(temp);
-        }
-
-        return result;
-    }
-
-    /**
-     * Преобразует последовательность из 4-х байтов в слово
-     *
-     * @param bytes - 4 байта
-     * @return слово
-     */
-    public static int bytesToInt(byte[] bytes) {
-        return ((bytes[0] & 0xFF) << 24) |  // сдвигаем на первый байт
-                ((bytes[1] & 0xFF) << 16) | // сдвигаем на второй байт
-                ((bytes[2] & 0xFF) << 8) |  // сдвигаем на третий байт
-                (bytes[3] & 0xFF);          // оставляем на четвертом байте и все соединяем между собой
-    }
-
-    /**
      * Выполняет операцию XOR над 4-байтовым словом и 4-байтовым ключом
      *
      * @param word 4-байтовое слово

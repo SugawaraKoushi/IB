@@ -18,7 +18,7 @@ public class DecryptController {
 
     @PostMapping("/aes-128")
     public ResponseEntity<String> decryptFromAES128(@RequestBody Request request) {
-        String result = decryptService.decryptFromAES128(request.getText(), request.getKey());
+        String result = decryptService.decryptFromAES128(request.getText(), request.getKey(), request.getKeyType());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

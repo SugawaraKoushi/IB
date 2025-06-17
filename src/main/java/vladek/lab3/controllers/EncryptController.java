@@ -18,7 +18,7 @@ public class EncryptController {
 
     @PostMapping("/aes-128")
     public ResponseEntity<String> encryptByAES128(@RequestBody Request request) {
-        String result = encryptService.encryptByAES128(request.getText(), request.getKey());
+        String result = encryptService.encryptByAES128(request.getText(), request.getKey(), request.getKeyType());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

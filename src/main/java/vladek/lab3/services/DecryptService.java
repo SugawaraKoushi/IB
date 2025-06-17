@@ -1,5 +1,6 @@
 package vladek.lab3.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -10,11 +11,14 @@ import static vladek.lab3.helpers.AES128Helper.*;
 
 @Service
 public class DecryptService implements IDecryptService {
+    @Autowired
+    private KeyService keyService;
+
     @Override
-    public String decryptFromAES128(String text, String key) {
+    public String decryptFromAES128(String text, String key, int keyType) {
         int[] textWords = base64StringToIntArray(text);
         int[] decodedTextWords = new int[textWords.length];
-        int[] keyWords = normalizeKey(key);
+        int[] keyWords = keyService.normalizeKey(key, keyType);
         int[][] keys = expandKeys(keyWords);
 
         for (int i = 0; i < textWords.length; i += 4) {
@@ -64,6 +68,19 @@ public class DecryptService implements IDecryptService {
         }
 
         return result;
+    }
+
+    /**
+     * Преобразует последовательность из 4-х байтов в слово
+     *
+     * @param bytes - 4 байта
+     * @return слово
+     */
+    public static int bytesToInt(byte[] bytes) {
+        return ((bytes[0] & 0xFF) << 24) |  // сдвигаем на первый байт
+                ((bytes[1] & 0xFF) << 16) | // сдвигаем на второй байт
+                ((bytes[2] & 0xFF) << 8) |  // сдвигаем на третий байт
+                (bytes[3] & 0xFF);          // оставляем на четвертом байте и все соединяем между собой
     }
 
     /**
