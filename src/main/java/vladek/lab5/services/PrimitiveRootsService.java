@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import vladek.lab4.services.PrimeNumbersService;
+import vladek.lab5.dto.PrimitiveRootsResponse;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -14,14 +15,21 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class KeyExchangeService {
+public class PrimitiveRootsService {
     private final PrimeNumbersService primeNumbersService;
 
-    public List<BigInteger> findPrimitiveRoots(BigInteger n) {
+    public PrimitiveRootsResponse findPrimitiveRoots(BigInteger n) {
         List<BigInteger> roots = new ArrayList<>();
+        PrimitiveRootsResponse result = new PrimitiveRootsResponse();
         StopWatch sw = new StopWatch();
         sw.start();
-        if (!hasPrimitiveRoots(n)) return roots;
+
+        if (!hasPrimitiveRoots(n)){
+            sw.stop();
+            result.setRoots(roots);
+            result.setSeconds(sw.getTotalTimeSeconds());
+            return result;
+        }
 
         BigInteger phi = eulerFunc(n);
         BigInteger rootsCount = eulerFunc(phi);
@@ -47,8 +55,9 @@ public class KeyExchangeService {
         }
 
         sw.stop();
-//        System.out.println(sw.getTotalTimeSeconds());
-        return roots;
+        result.setRoots(roots);
+        result.setSeconds(sw.getTotalTimeSeconds());
+        return result;
     }
 
     /**
@@ -56,7 +65,7 @@ public class KeyExchangeService {
      *
      * @return Взаимно простые числа с n
      */
-    public BigInteger eulerFunc(BigInteger n) {
+    private BigInteger eulerFunc(BigInteger n) {
         BigInteger count = BigInteger.ZERO;
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(n) <= 0; i = i.add(BigInteger.ONE)) {
@@ -82,7 +91,7 @@ public class KeyExchangeService {
      *
      * @return Множество простых множителей
      */
-    public Set<BigInteger> getPrimeFactors(BigInteger n) {
+    private Set<BigInteger> getPrimeFactors(BigInteger n) {
         Set<BigInteger> factors = new HashSet<>();
 
         // Пока число делится на 2, будем делить его на 2
