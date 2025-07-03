@@ -2,6 +2,7 @@ package vladek.lab4.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
+import vladek.lab4.dto.PrimeTestResult;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -13,19 +14,23 @@ public class PrimeNumbersService {
      * Тест Ферма простоты числа
      *
      * @param n нечетное число >= 5
-     * @return простота числа
+     * @return Число меньше 0, если число составное.
+     * Число равное 0, если число Карлмайкла.
+     * Число больше 0, если число вероятно простое.
+     * А так же затраченное время на определение простоты.
      */
-    public String fermatTest(long n) {
+    public PrimeTestResult fermatTest(long n) {
         Random random = new Random();
         boolean isPrimeNumber = false;
         boolean isCarlmichaelNumber = true;
-        int iterations = 1000000;
+        int iterations = 20;
         StopWatch sw = new StopWatch();
+        PrimeTestResult result = new PrimeTestResult();
 
         sw.start();
         for (int i = 0; i < iterations; i++) {
             long a = random.nextLong(2, n - 1);
-            long r = (long) Math.pow((double) a, (double) (n - 1)) % n;
+            long r = modPow(a, n - 1, n);
 
             if (r == 1) {
                 isPrimeNumber = true;
@@ -34,105 +39,73 @@ public class PrimeNumbersService {
 
                 if (isPrimeNumber) {
                     sw.stop();
-                    return String.format("Число %d вероятно простое.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+                    result.setNumberType(-1);
+                    result.setSeconds(sw.getTotalTimeSeconds());
+                    return result;
                 }
             }
         }
 
         if (!isPrimeNumber) {
             sw.stop();
-            return String.format("Число %d составное.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+            result.setNumberType(-1);
+            result.setSeconds(sw.getTotalTimeSeconds());
+            return result;
         }
 
         if (!isCarlmichaelNumber) {
-            return String.format("Число %d вероятно простое.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+            sw.stop();
+            result.setNumberType(1);
+            result.setSeconds(sw.getTotalTimeSeconds());
+            return result;
         }
 
         sw.stop();
-        return String.format("Число %d является числом Кармайкла.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+        result.setNumberType(0);
+        result.setSeconds(sw.getTotalTimeSeconds());
+        return result;
+    }
+
+    private long modPow(long a, long exponent, long mod) {
+        long result = 1;
+
+        while (exponent > 0) {
+            if (exponent % 2 == 1) {
+                result = (result * a) % mod;
+            }
+
+            a = (a * a) % mod;
+            exponent = exponent >> 1;
+        }
+
+        return result;
     }
 
     /**
      * Тест Рабина - Миллера простоты числа
      *
-     * @param n нечетное число
-     * @param k количество раундов
-     * @return простота числа
-     */
-    public String millerRabinTest(long n, int k) {
-        StopWatch sw = new StopWatch();
-        sw.start();
-
-        if (n == 2 || n == 3) {
-            sw.stop();
-            return String.format("Число %d вероятно простое.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
-        }
-
-        if (n % 2 == 0) {
-            sw.stop();
-            return String.format("Число %d составное.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
-        }
-
-        long t = n - 1;
-        int s = 0;
-
-        while (t % 2 == 0) {
-            t /= 2;
-            s++;
-        }
-        ;
-
-        Random random = new Random();
-
-        for (int i = 0; i < k; i++) {
-            long a = random.nextLong(2, n - 1);
-            long x = (long) Math.pow((double) a, (double) t) % n;
-
-            if (x == 1 || x == n - 1) continue;
-
-            for (int j = 0; j < s - 1; j++) {
-                x = x * x % 2;
-
-                if (x == 1) {
-                    sw.stop();
-                    return String.format("Число %d составное.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
-                }
-
-                if (x == n - 1) {
-                    break;
-                }
-            }
-
-            if (x != n - 1) {
-                sw.stop();
-                return String.format("Число %d составное.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
-            }
-        }
-
-        sw.stop();
-        return String.format("Число %d вероятно простое.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
-    }
-
-
-    /**
-     * Тест Рабина - Миллера простоты числа для очень больших чисел
-     *
      * @param n очень большое нечетное число
      * @param k количество раундов
-     * @return число меньше 0, если число составное. Число равное 0, если число вероятно простое
+     * @return Число меньше 0, если число составное.
+     * Число больше 0, если число вероятно простое
      */
-    private int millerRabanTestForBigInteger(BigInteger n, int k) {
+    public PrimeTestResult millerRabinTest(BigInteger n, int k) {
+        PrimeTestResult result = new PrimeTestResult();
         StopWatch sw = new StopWatch();
         sw.start();
 
         if (n.equals(BigInteger.TWO) || n.equals(new BigInteger("3"))) {
             sw.stop();
-            return 0;
+            result.setNumberType(1);
+            result.setSeconds(sw.getTotalTimeSeconds());
+            return result;
         }
 
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
             sw.stop();
-            return -1;
+            result.setNumberType(-1);
+            result.setSeconds(sw.getTotalTimeSeconds());
+            return result;
         }
 
         BigInteger t = n.subtract(BigInteger.ONE);
@@ -146,7 +119,12 @@ public class PrimeNumbersService {
         Random random = new Random();
 
         for (int i = 0; i < k; i++) {
-            BigInteger a = new BigInteger(n.subtract(BigInteger.ONE).bitCount(), random);
+            BigInteger a;
+
+            do {
+                a = new BigInteger(n.bitLength(), random);
+            } while (a.compareTo(BigInteger.TWO) < 0 || a.compareTo(n.subtract(BigInteger.TWO)) > 0);
+
             BigInteger x = a.modPow(t, n);
 
             if (x.equals(BigInteger.ONE) || x.equals(n.subtract(BigInteger.ONE))) continue;
@@ -156,7 +134,9 @@ public class PrimeNumbersService {
 
                 if (x.equals(BigInteger.ONE)) {
                     sw.stop();
-                    return -1;
+                    result.setNumberType(-1);
+                    result.setSeconds(sw.getTotalTimeSeconds());
+                    return result;
                 }
 
                 if (x.equals(n.subtract(BigInteger.ONE))) {
@@ -166,12 +146,16 @@ public class PrimeNumbersService {
 
             if (!x.equals(n.subtract(BigInteger.ONE))) {
                 sw.stop();
-                return -1;
+                result.setNumberType(-1);
+                result.setSeconds(sw.getTotalTimeSeconds());
+                return result;
             }
         }
 
         sw.stop();
-        return 0;
+        result.setNumberType(1);
+        result.setSeconds(sw.getTotalTimeSeconds());
+        return result;
     }
 
 
@@ -181,7 +165,8 @@ public class PrimeNumbersService {
      * @param n число
      * @return простота числа
      */
-    public String divisionTest(long n) {
+    public PrimeTestResult divisionTest(long n) {
+        PrimeTestResult result = new PrimeTestResult();
         StopWatch sw = new StopWatch();
         sw.start();
         long border = (long) Math.sqrt((double) n);
@@ -189,11 +174,16 @@ public class PrimeNumbersService {
         for (int i = 2; i <= border; i++) {
             if (n % i == 0) {
                 sw.stop();
-                return String.format("Число %d составное.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+                result.setNumberType(-1);
+                result.setSeconds(sw.getTotalTimeSeconds());
+                return result;
             }
         }
 
-        return String.format("Число %d простое.%nЗатрачено времени: %.6f сек", n, sw.getTotalTimeSeconds());
+        sw.stop();
+        result.setNumberType(1);
+        result.setSeconds(sw.getTotalTimeSeconds());
+        return result;
     }
 
     /**
@@ -225,7 +215,7 @@ public class PrimeNumbersService {
         }
 
         for (int i = 0; i < rounds; i++) {
-            if (millerRabanTestForBigInteger(p, rounds) < 0) {
+            if (millerRabinTest(p, rounds).getNumberType() < 0) {
                 return new BigInteger("-1");
             }
         }
