@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -24,7 +25,7 @@ public class PrimitiveRootsService {
         StopWatch sw = new StopWatch();
         sw.start();
 
-        if (!hasPrimitiveRoots(n)){
+        if (!hasPrimitiveRoots(n)) {
             sw.stop();
             result.setRoots(roots);
             result.setSeconds(sw.getTotalTimeSeconds());
@@ -66,15 +67,24 @@ public class PrimitiveRootsService {
      * @return Взаимно простые числа с n
      */
     private BigInteger eulerFunc(BigInteger n) {
-        BigInteger count = BigInteger.ZERO;
-
-        for (BigInteger i = BigInteger.ZERO; i.compareTo(n) <= 0; i = i.add(BigInteger.ONE)) {
-            if (gcd(n, i).equals(BigInteger.ONE)) {
-                count = count.add(BigInteger.ONE);
-            }
+        if (primeNumbersService.millerRabinTest(n, 20).getNumberType() > 0) {
+            return n.subtract(BigInteger.ONE);
         }
 
-        return count;
+        Set<BigInteger> primeFactors = getPrimeFactors(n);
+
+//        Set<BigInteger> factors = getAllFactors(n);
+//        Set<BigInteger> primeFactors = factors
+//                .stream()
+//                .filter(factor -> primeNumbersService.millerRabinTest(factor, 20).getNumberType() > 0)
+//                .collect(Collectors.toSet());
+
+        BigInteger result = n;
+        for (BigInteger p : primeFactors) {
+            result = result.divide(p).multiply(p.subtract(BigInteger.ONE));
+        }
+
+        return result;
     }
 
     /**
@@ -178,5 +188,53 @@ public class PrimitiveRootsService {
         }
 
         return true;
+    }
+
+    public Set<BigInteger> getAllFactors(BigInteger n) {
+        Set<BigInteger> factors = new HashSet<>();
+
+        if (n.compareTo(BigInteger.ONE) <= 0) {
+            return factors;
+        }
+
+        while (!n.equals(BigInteger.ONE)) {
+            BigInteger p = pollardRhoFactorization(n);
+
+            // Если число простое
+            if (p.equals(n) || p.equals(BigInteger.ONE)) {
+                factors.add(n);
+                return factors;
+            }
+
+            factors.add(p);
+            n = n.divide(p);
+        }
+
+        return factors;
+    }
+
+    public BigInteger pollardRhoFactorization(BigInteger n) {
+        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+            return BigInteger.TWO;
+        }
+
+        BigInteger x = BigInteger.TWO;
+        BigInteger y = BigInteger.TWO;
+        BigInteger p = BigInteger.ONE;
+        int i = 0;
+        int bound = 1000;
+
+        while (p.equals(BigInteger.ONE)) {
+            x = f(x);
+            y = f(f(y).mod(n)).mod(n);
+            p = gcd(x.subtract(y), n);
+            i++;
+        }
+
+        return p;
+    }
+
+    private BigInteger f(BigInteger x) {
+        return x.pow(2).add(BigInteger.ONE);
     }
 }

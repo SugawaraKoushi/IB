@@ -66,6 +66,12 @@ public class PrimeNumbersService {
         return result;
     }
 
+    /**
+     * Эффективное возведение числа в степень по модулю
+     * @param a число возводимое в степень
+     * @param exponent степень
+     * @param mod модуль
+     */
     private long modPow(long a, long exponent, long mod) {
         long result = 1;
 
@@ -207,7 +213,11 @@ public class PrimeNumbersService {
         };
 
         for (int prime : primes) {
-            BigInteger n = new BigInteger(String.valueOf((prime)));
+            BigInteger n = BigInteger.valueOf(prime);
+
+            if (p.equals(n)){
+                return p;
+            }
 
             if (p.mod(n).equals(BigInteger.ZERO)) {
                 return new BigInteger("-1");
@@ -222,4 +232,15 @@ public class PrimeNumbersService {
 
         return p;
     }
+
+    public String getRandomPrimeNumber(int bits, int rounds) {
+        BigInteger bigInt;
+
+        do {
+            bigInt = generatePrimeNumber(bits, rounds);
+        } while (bigInt.equals(new BigInteger("-1")));
+
+        return bigInt.toString().concat("n");
+    }
+
 }
