@@ -240,7 +240,7 @@ public class PrimeNumbersService {
             bigInt = generatePrimeNumber(bits, rounds);
         } while (bigInt.equals(new BigInteger("-1")));
 
-        return bigInt.toString().concat("n");
+        return bigInt.toString();
     }
 
 }

@@ -36,6 +36,7 @@ public class PrimeNumbersController {
     @GetMapping("/generate-prime-number")
     public ResponseEntity<String> generatePrimeNumber(@RequestParam int bits, @RequestParam int rounds) {
         String result = primeNumbersService.getRandomPrimeNumber(bits, rounds);
+        result = result.concat("n");
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
