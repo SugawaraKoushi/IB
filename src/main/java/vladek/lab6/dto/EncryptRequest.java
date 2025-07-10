@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class EncryptRequest {
     private String text;
-    private RSAPublicKey key;
+    private RSAPublicKey rsaPublicKey;
+    private String aesKey;
 }

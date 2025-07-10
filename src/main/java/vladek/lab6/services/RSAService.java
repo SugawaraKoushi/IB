@@ -18,17 +18,25 @@ import java.util.Arrays;
 public class RSAService {
     private final PrimeNumbersService primeNumbersService;
 
+    /**
+     * Генерирует RSA ключи на основе 512 битных параметров p и q
+     * @return RSA ключи
+     */
     public RSAKeyPair keyGeneration() {
-        BigInteger p = new BigInteger(primeNumbersService.getRandomPrimeNumber(512, 20));
+        BigInteger p = primeNumbersService.getRandomPrimeNumber(512, 20);
         BigInteger q;
 
         do {
-            q = new BigInteger(primeNumbersService.getRandomPrimeNumber(512, 20));
+            q = primeNumbersService.getRandomPrimeNumber(512, 20);
         } while (p.equals(q));
 
         return keyGeneration(p, q);
     }
 
+    /**
+     * Генерирует RSA ключи
+     * @return RSA ключи
+     */
     public RSAKeyPair keyGeneration(BigInteger p, BigInteger q) {
         BigInteger n = p.multiply(q);
         BigInteger phi = eulerFunc(p, q);
@@ -43,12 +51,12 @@ public class RSAService {
         BigInteger d = euclidAlgorithm(e, phi)[1].mod(phi); // нужно положительное d
 
         RSAPublicKey publicKey = new RSAPublicKey();
-        publicKey.setE(e.toString().concat("n"));
-        publicKey.setN(n.toString().concat("n"));
+        publicKey.setE(e.toString(16));
+        publicKey.setN(n.toString(16));
 
         RSAPrivateKey privateKey = new RSAPrivateKey();
-        privateKey.setD(d.toString().concat("n"));
-        privateKey.setN(n.toString().concat("n"));
+        privateKey.setD(d.toString(16));
+        privateKey.setN(n.toString(16));
 
         RSAKeyPair keyPair = new RSAKeyPair();
         keyPair.setPublicKey(publicKey);
@@ -57,10 +65,16 @@ public class RSAService {
         return keyPair;
     }
 
+    /**
+     * Зашифровывает текст при помощи общего RSA ключа
+     * @param text текст
+     * @param key общий ключ
+     * @return байты зашифрованного текст
+     */
     public byte[] encrypt(String text, RSAPublicKey key) {
         byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
-        BigInteger n = new BigInteger(key.getN());
-        BigInteger e = new BigInteger(key.getE());
+        BigInteger n = new BigInteger(key.getN(), 16);
+        BigInteger e = new BigInteger(key.getE(), 16);
         int blockSize = n.bitLength() - 1; // Размер блока в битах
         byte[] modulusBytes = n.toByteArray();
         int outputBlockSize = modulusBytes.length;  // Размер блока в байтах
@@ -99,9 +113,16 @@ public class RSAService {
         return encryptedBytes.toByteArray();
     }
 
+
+    /**
+     * Дешифрует текст при помощи секретного RSA ключа
+     * @param encryptedData байты зашифрованного текста
+     * @param key секретный ключ
+     * @return дешифрованный текст
+     */
     public String decrypt(byte[] encryptedData, RSAPrivateKey key) {
-        BigInteger n = new BigInteger(key.getN());
-        BigInteger d = new BigInteger(key.getD());
+        BigInteger n = new BigInteger(key.getN(), 16);
+        BigInteger d = new BigInteger(key.getD(), 16);
         int modulusLength = n.toByteArray().length;
         ByteArrayOutputStream decryptedBytes = new ByteArrayOutputStream();
 
@@ -128,6 +149,9 @@ public class RSAService {
         return decryptedBytes.toString(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Функция эйлера
+     */
     private BigInteger eulerFunc(BigInteger p, BigInteger q) {
         return p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
     }

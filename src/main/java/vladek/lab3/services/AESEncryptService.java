@@ -10,11 +10,10 @@ import java.util.Base64;
 import static vladek.lab3.helpers.AES128Helper.*;
 
 @Service
-public class EncryptService implements IEncryptService {
+public class AESEncryptService {
     @Autowired
     private KeyService keyService;
 
-    @Override
     public String encryptByAES128(String text, String key, int keyType) {
         // State - изначальный текст, представленный в виде 16 байт
 

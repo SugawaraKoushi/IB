@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vladek.lab3.dto.Request;
-import vladek.lab3.services.IDecryptService;
+import vladek.lab3.services.AESDecryptService;
 
 @RestController
 @RequestMapping("/api/lab3/decrypt")
 public class DecryptController {
     @Autowired
-    private IDecryptService decryptService;
+    private AESDecryptService aesDecryptService;
 
     @PostMapping("/aes-128")
     public ResponseEntity<String> decryptFromAES128(@RequestBody Request request) {
-        String result = decryptService.decryptFromAES128(request.getText(), request.getKey(), request.getKeyType());
+        String result = aesDecryptService.decryptFromAES128(request.getText(), request.getKey(), request.getKeyType());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

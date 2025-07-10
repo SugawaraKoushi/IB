@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class DecryptRequest {
     private String text;
-    private RSAPrivateKey key;
+    private RSAPrivateKey rsaPrivateKey;
+    private String encryptedAESKey;
 }

@@ -233,14 +233,14 @@ public class PrimeNumbersService {
         return p;
     }
 
-    public String getRandomPrimeNumber(int bits, int rounds) {
+    public BigInteger getRandomPrimeNumber(int bits, int rounds) {
         BigInteger bigInt;
 
         do {
             bigInt = generatePrimeNumber(bits, rounds);
         } while (bigInt.equals(new BigInteger("-1")));
 
-        return bigInt.toString();
+        return bigInt;
     }
 
 }

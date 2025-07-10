@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 public class PrimitiveRootsService {
     private final PrimeNumbersService primeNumbersService;
 
+    /**
+     * Нахождение первообразных корней числа n
+     */
     public PrimitiveRootsResponse findPrimitiveRoots(BigInteger n) {
         List<BigInteger> roots = new ArrayList<>();
         PrimitiveRootsResponse result = new PrimitiveRootsResponse();
@@ -72,12 +75,6 @@ public class PrimitiveRootsService {
         }
 
         Set<BigInteger> primeFactors = getPrimeFactors(n);
-
-//        Set<BigInteger> factors = getAllFactors(n);
-//        Set<BigInteger> primeFactors = factors
-//                .stream()
-//                .filter(factor -> primeNumbersService.millerRabinTest(factor, 20).getNumberType() > 0)
-//                .collect(Collectors.toSet());
 
         BigInteger result = n;
         for (BigInteger p : primeFactors) {
@@ -181,6 +178,11 @@ public class PrimitiveRootsService {
         return BigInteger.ZERO;
     }
 
+    /**
+     * Проверяется, является ли число p степенью по модулю числа n
+     * @param n число
+     * @param p степень
+     */
     private boolean isPowerOfPrime(BigInteger n, BigInteger p) {
         while (n.compareTo(BigInteger.ONE) > 0) {
             if (!n.mod(p).equals(BigInteger.ZERO)) return false;
@@ -190,6 +192,11 @@ public class PrimitiveRootsService {
         return true;
     }
 
+    /**
+     * Находит все уникальные простые множители числа
+     * @param n число, для которого ищутся простые множители
+     * @return
+     */
     public Set<BigInteger> getAllFactors(BigInteger n) {
         Set<BigInteger> factors = new HashSet<>();
 
@@ -213,6 +220,11 @@ public class PrimitiveRootsService {
         return factors;
     }
 
+    /**
+     * Метод нахождения простого множителя методом Полларда "Ро"
+     * @param n
+     * @return
+     */
     public BigInteger pollardRhoFactorization(BigInteger n) {
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
             return BigInteger.TWO;
@@ -221,14 +233,11 @@ public class PrimitiveRootsService {
         BigInteger x = BigInteger.TWO;
         BigInteger y = BigInteger.TWO;
         BigInteger p = BigInteger.ONE;
-        int i = 0;
-        int bound = 1000;
 
         while (p.equals(BigInteger.ONE)) {
             x = f(x);
             y = f(f(y).mod(n)).mod(n);
             p = gcd(x.subtract(y), n);
-            i++;
         }
 
         return p;

@@ -10,11 +10,10 @@ import java.util.Base64;
 import static vladek.lab3.helpers.AES128Helper.*;
 
 @Service
-public class DecryptService implements IDecryptService {
+public class AESDecryptService {
     @Autowired
     private KeyService keyService;
 
-    @Override
     public String decryptFromAES128(String text, String key, int keyType) {
         int[] textWords = base64StringToIntArray(text);
         int[] decodedTextWords = new int[textWords.length];

@@ -11,6 +11,9 @@ import java.math.BigInteger;
 
 @Service
 public class FileUploadService {
+    /**
+     * Считывает из файла параметры p и q для генерации RSA ключей
+     */
     public InputFileResponse parseJsonFile(MultipartFile file) throws IOException {
         File temp = File.createTempFile("temp-", null);
         file.transferTo(temp);

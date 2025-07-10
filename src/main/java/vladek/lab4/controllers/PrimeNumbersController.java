@@ -35,8 +35,15 @@ public class PrimeNumbersController {
 
     @GetMapping("/generate-prime-number")
     public ResponseEntity<String> generatePrimeNumber(@RequestParam int bits, @RequestParam int rounds) {
-        String result = primeNumbersService.getRandomPrimeNumber(bits, rounds);
-        result = result.concat("n");
+        BigInteger n = primeNumbersService.getRandomPrimeNumber(bits, rounds);
+        String result = n.toString().concat("n");
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/generate-hex-prime-number")
+    public ResponseEntity<String> generateHexPrimeNumber(@RequestParam int bits, @RequestParam int rounds) {
+        BigInteger n = primeNumbersService.getRandomPrimeNumber(bits, rounds);
+        String result = n.toString(16);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

@@ -1,12 +1,13 @@
 package vladek.lab6.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import vladek.lab3.services.AESDecryptService;
+import vladek.lab3.services.AESEncryptService;
 import vladek.lab6.dto.*;
 import vladek.lab6.services.FileDownloadService;
 import vladek.lab6.services.FileUploadService;
@@ -14,7 +15,6 @@ import vladek.lab6.services.RSAService;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.interfaces.RSAKey;
 import java.util.Base64;
 
 @RestController
@@ -24,6 +24,8 @@ public class RSAController {
     private final FileUploadService fileUploadService;
     private final FileDownloadService fileDownloadService;
     private final RSAService rsaService;
+    private final AESEncryptService aesEncryptService;
+    private final AESDecryptService aesDecryptService;
 
     @PostMapping("/upload-file")
     public ResponseEntity<InputFileResponse> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
@@ -40,12 +42,12 @@ public class RSAController {
 
     @GetMapping("/get-keys")
     public ResponseEntity<KeyPairResponse> getRSAKeys(@RequestParam String p, @RequestParam String q) {
-        BigInteger pBig = new BigInteger(p);
-        BigInteger qBig = new BigInteger(q);
+        BigInteger pBig = new BigInteger(p, 16);
+        BigInteger qBig = new BigInteger(q, 16);
         RSAKeyPair keyPair = rsaService.keyGeneration(pBig, qBig);
 
         try {
-            byte[] zipBytes = fileDownloadService.createFileToDownload(keyPair);
+            byte[] zipBytes = fileDownloadService.createRSAKeysZipArchive(keyPair);
             String zipBase64 = Base64.getUrlEncoder().encodeToString(zipBytes);
 
             KeyPairResponse response = new KeyPairResponse();
@@ -61,20 +63,49 @@ public class RSAController {
     }
 
     @PostMapping("/encrypt")
-    public ResponseEntity<String> encrypt(@RequestBody EncryptRequest request) {
-        request.getKey().setE(request.getKey().getE().replace("n", ""));
-        request.getKey().setN(request.getKey().getN().replace("n", ""));
-        byte[] encryptedTextBytes = rsaService.encrypt(request.getText(), request.getKey());
-        String result = Base64.getEncoder().encodeToString(encryptedTextBytes);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<EncryptResponse> encrypt(@RequestBody EncryptRequest request) {
+        String encryptedText = aesEncryptService.encryptByAES128(request.getText(), request.getAesKey(), 2);
+        byte[] encryptedAESKeyBytes = rsaService.encrypt(request.getAesKey(), request.getRsaPublicKey());
+        String encryptedAESKey = Base64.getEncoder().encodeToString(encryptedAESKeyBytes);
+
+        try {
+            byte[] zipBytes = fileDownloadService.createAESEncryptionZipArchive(encryptedAESKey, encryptedText);
+            String zipBase64 = Base64.getUrlEncoder().encodeToString(zipBytes);
+
+            EncryptResponse response = new EncryptResponse();
+            response.setEncryptedText(encryptedText);
+            response.setEncryptedKey(encryptedAESKey);
+            response.setZip(zipBase64);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/decrypt")
-    public ResponseEntity<String> encrypt(@RequestBody DecryptRequest request) {
-        request.getKey().setD(request.getKey().getD().replace("n", ""));
-        request.getKey().setN(request.getKey().getN().replace("n", ""));
-        byte[] bytes = Base64.getDecoder().decode(request.getText());
-        String decryptedText = rsaService.decrypt(bytes, request.getKey());
-        return new ResponseEntity<>(decryptedText, HttpStatus.OK);
+    public ResponseEntity<DecryptResponse> decrypt(@RequestBody DecryptRequest request) {
+        byte[] encryptedAesKeyBytes = Base64.getDecoder().decode(request.getEncryptedAESKey());
+        String decryptedAESKey = rsaService.decrypt(encryptedAesKeyBytes, request.getRsaPrivateKey());
+        String decryptedText = aesDecryptService.decryptFromAES128(request.getText(), decryptedAESKey, 2);
+
+        try {
+            byte[] zipBytes = fileDownloadService.createAESDecryptionZipArchive(decryptedText);
+            String zipBase64 = Base64.getUrlEncoder().encodeToString(zipBytes);
+
+            DecryptResponse response = new DecryptResponse();
+            response.setDecryptedText(decryptedText);
+            response.setZip(zipBase64);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
+
 }
