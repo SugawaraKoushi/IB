@@ -11,10 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +26,10 @@ public class RSAService {
             q = new BigInteger(primeNumbersService.getRandomPrimeNumber(512, 20));
         } while (p.equals(q));
 
+        return keyGeneration(p, q);
+    }
+
+    public RSAKeyPair keyGeneration(BigInteger p, BigInteger q) {
         BigInteger n = p.multiply(q);
         BigInteger phi = eulerFunc(p, q);
 
@@ -41,15 +42,13 @@ public class RSAService {
 
         BigInteger d = euclidAlgorithm(e, phi)[1].mod(phi); // нужно положительное d
 
-        System.out.println(e.multiply(d).mod(phi).equals(BigInteger.ONE));
-
         RSAPublicKey publicKey = new RSAPublicKey();
-        publicKey.setE(e);
-        publicKey.setN(n);
+        publicKey.setE(e.toString().concat("n"));
+        publicKey.setN(n.toString().concat("n"));
 
         RSAPrivateKey privateKey = new RSAPrivateKey();
-        privateKey.setD(d);
-        privateKey.setN(n);
+        privateKey.setD(d.toString().concat("n"));
+        privateKey.setN(n.toString().concat("n"));
 
         RSAKeyPair keyPair = new RSAKeyPair();
         keyPair.setPublicKey(publicKey);
@@ -58,71 +57,12 @@ public class RSAService {
         return keyPair;
     }
 
-//    public byte[] encrypt(String text, RSAPublicKey key) {
-////        byte[] textBytes = Base64.getEncoder().encode(text.getBytes());
-//        byte[] textBytes = text.getBytes();
-//        BigInteger textBigInt = new BigInteger(textBytes);
-//        int blockSize = key.getN().bitLength() - 1;
-//        int chunksCount = (int) Math.ceil((double) textBigInt.bitLength() / blockSize);
-//        List<Byte> encryptedBytesList = new ArrayList<>();
-//
-//        for (int i = 0; i < chunksCount; i++) {
-//            BigInteger chunk = textBigInt.shiftRight(i * blockSize);
-//
-//            for (int j = blockSize; j < chunk.bitLength(); j++) {
-//                chunk = chunk.clearBit(j);
-//            }
-//
-//            chunk = chunk.modPow(key.getE(), key.getN());
-//
-//            for(byte b : chunk.toByteArray()) {
-//                encryptedBytesList.add(b);
-//            }
-//        }
-//
-//        byte[] bytes = new byte[encryptedBytesList.size()];
-//        for (int i = 0; i < bytes.length; i++) {
-//            bytes[i] = encryptedBytesList.get(i);
-//        }
-//
-//        return bytes;
-//    }
-//
-//    public String decrypt(byte[] text, RSAPrivateKey key) {
-//        BigInteger textBigInt = new BigInteger(text);
-//        int blockSize = key.getN().bitLength() - 1;
-//        int chunksCount = (int) Math.ceil((double) textBigInt.bitLength() / blockSize);
-//        List<Byte> decryptedBytesList = new ArrayList<>();
-//
-//        for (int i = 0; i < chunksCount; i++) {
-//            BigInteger chunk = textBigInt.shiftRight(i * blockSize);
-//
-//            for (int j = blockSize; j < chunk.bitLength(); j++) {
-//                chunk = chunk.clearBit(j);
-//            }
-//
-//            chunk = chunk.modPow(key.getD(), key.getN());
-//
-//            for(byte b : chunk.toByteArray()) {
-//                decryptedBytesList.add(b);
-//            }
-//        }
-//
-//        byte[] bytes = new byte[decryptedBytesList.size()];
-//
-//        for (int i = 0; i < bytes.length; i++) {
-//            bytes[i] = decryptedBytesList.get(i);
-//        }
-//
-
-    /// /        bytes = Base64.getDecoder().decode(bytes);
-//
-//        return new String(bytes);
-//    }
     public byte[] encrypt(String text, RSAPublicKey key) {
         byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
-        int blockSize = key.getN().bitLength() - 1; // Размер блока в битах
-        byte[] modulusBytes = key.getN().toByteArray();
+        BigInteger n = new BigInteger(key.getN());
+        BigInteger e = new BigInteger(key.getE());
+        int blockSize = n.bitLength() - 1; // Размер блока в битах
+        byte[] modulusBytes = n.toByteArray();
         int outputBlockSize = modulusBytes.length;  // Размер блока в байтах
         ByteArrayOutputStream encryptedBytes = new ByteArrayOutputStream();
 
@@ -137,7 +77,7 @@ public class RSAService {
             BigInteger chunkBigInt = new BigInteger(1, chunk);
 
             // Шифруем кусок текста
-            BigInteger encryptedChunk = chunkBigInt.modPow(key.getE(), key.getN());
+            BigInteger encryptedChunk = chunkBigInt.modPow(e, n);
 
             byte[] encryptedChunkBytes = encryptedChunk.toByteArray();
 
@@ -160,7 +100,9 @@ public class RSAService {
     }
 
     public String decrypt(byte[] encryptedData, RSAPrivateKey key) {
-        int modulusLength = key.getN().toByteArray().length;
+        BigInteger n = new BigInteger(key.getN());
+        BigInteger d = new BigInteger(key.getD());
+        int modulusLength = n.toByteArray().length;
         ByteArrayOutputStream decryptedBytes = new ByteArrayOutputStream();
 
         // Разбиваем на блоки и расшифровываем
@@ -171,7 +113,7 @@ public class RSAService {
             // Говорим, что каждый байт это положительное число, и 8й бит не знаковый, а входит в это число
             BigInteger chunkBigInt = new BigInteger(1, chunk);
 
-            BigInteger decryptedChunk = chunkBigInt.modPow(key.getD(), key.getN());
+            BigInteger decryptedChunk = chunkBigInt.modPow(d, n);
             byte[] decryptedChunkBytes = decryptedChunk.toByteArray();
 
             // Удаляем ведущий нулевой байт, если он есть
