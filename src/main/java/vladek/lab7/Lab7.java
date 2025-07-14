@@ -1,14 +1,16 @@
 package vladek.lab7;
 
+import org.apache.commons.codec.binary.Hex;
 import vladek.lab7.services.SHA256Service;
 
-import java.math.BigInteger;
+import java.io.IOException;
 
 public class Lab7 {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws  IOException {
         SHA256Service sha256Service = new SHA256Service();
-        BigInteger a = sha256Service.prepareSourceMessage("Привет как дела?Привет как дела?Привет как дела?Привет как дела?Привет как делаПривет как дела?Привет как дела?Привет как дела?");
-        System.out.println(a.bitLength());
-        System.out.println(sha256Service.rotShiftRight(4, 1));
+        String msg = "abc";
+        byte[][] a = sha256Service.prepareMessageBlocks(msg);
+        byte[] b = sha256Service.getHashCode(a);
+        System.out.println(Hex.encodeHex(b));
     }
 }
