@@ -166,7 +166,6 @@ public class PrimitiveRootsService {
      */
     private BigInteger findFirstPrimeFactor(BigInteger n) {
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) return BigInteger.TWO;
-        BigInteger border = n.sqrt();
 
         for (BigInteger delimeter = BigInteger.valueOf(3); delimeter.compareTo(n) <= 0; delimeter = delimeter.add(BigInteger.TWO)) {
             if (n.mod(delimeter).equals(BigInteger.ZERO)) {
@@ -179,6 +178,7 @@ public class PrimitiveRootsService {
 
     /**
      * Проверяется, является ли число p степенью по модулю числа n
+     *
      * @param n число
      * @param p степень
      */
@@ -193,8 +193,8 @@ public class PrimitiveRootsService {
 
     /**
      * Находит все уникальные простые множители числа
+     *
      * @param n число, для которого ищутся простые множители
-     * @return
      */
     public Set<BigInteger> getAllFactors(BigInteger n) {
         Set<BigInteger> factors = new HashSet<>();
@@ -221,8 +221,6 @@ public class PrimitiveRootsService {
 
     /**
      * Метод нахождения простого множителя методом Полларда "Ро"
-     * @param n
-     * @return
      */
     public BigInteger pollardRhoFactorization(BigInteger n) {
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {

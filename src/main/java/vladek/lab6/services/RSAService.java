@@ -2,7 +2,6 @@ package vladek.lab6.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vladek.lab4.services.PrimeNumbersService;
 import vladek.lab6.dto.RSAKeyPair;
 import vladek.lab6.dto.RSAPrivateKey;
 import vladek.lab6.dto.RSAPublicKey;
@@ -15,7 +14,6 @@ import java.util.Arrays;
 @Service
 @RequiredArgsConstructor
 public class RSAService {
-    private final PrimeNumbersService primeNumbersService;
 
     /**
      * Генерирует RSA ключи

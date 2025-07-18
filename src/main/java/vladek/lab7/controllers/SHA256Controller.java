@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vladek.lab7.services.SHA256Service;
 
-import java.util.Base64;
-
 @RestController
 @RequestMapping("/api/lab7/sha-256")
 @RequiredArgsConstructor
