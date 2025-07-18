@@ -9,7 +9,6 @@ import vladek.lab6.dto.RSAPublicKey;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -17,21 +16,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class RSAService {
     private final PrimeNumbersService primeNumbersService;
-
-    /**
-     * Генерирует RSA ключи на основе 512 битных параметров p и q
-     * @return RSA ключи
-     */
-    public RSAKeyPair keyGeneration() {
-        BigInteger p = primeNumbersService.getRandomPrimeNumber(512, 20);
-        BigInteger q;
-
-        do {
-            q = primeNumbersService.getRandomPrimeNumber(512, 20);
-        } while (p.equals(q));
-
-        return keyGeneration(p, q);
-    }
 
     /**
      * Генерирует RSA ключи
