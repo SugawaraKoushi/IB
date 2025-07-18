@@ -15,6 +15,7 @@ import vladek.lab6.services.RSAService;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @RestController
@@ -65,7 +66,8 @@ public class RSAController {
     @PostMapping("/encrypt")
     public ResponseEntity<EncryptResponse> encrypt(@RequestBody EncryptRequest request) {
         String encryptedText = aesEncryptService.encryptByAES128(request.getText(), request.getAesKey(), 2);
-        byte[] encryptedAESKeyBytes = rsaService.encrypt(request.getAesKey(), request.getRsaPublicKey());
+        byte[] keyBytes = request.getAesKey().getBytes(StandardCharsets.UTF_8);
+        byte[] encryptedAESKeyBytes = rsaService.encrypt(keyBytes, request.getRsaPublicKey());
         String encryptedAESKey = Base64.getEncoder().encodeToString(encryptedAESKeyBytes);
 
         try {
@@ -88,7 +90,8 @@ public class RSAController {
     @PostMapping("/decrypt")
     public ResponseEntity<DecryptResponse> decrypt(@RequestBody DecryptRequest request) {
         byte[] encryptedAesKeyBytes = Base64.getDecoder().decode(request.getEncryptedAESKey());
-        String decryptedAESKey = rsaService.decrypt(encryptedAesKeyBytes, request.getRsaPrivateKey());
+        byte[] decryptedAESKeyBytes = rsaService.decrypt(encryptedAesKeyBytes, request.getRsaPrivateKey());
+        String decryptedAESKey = new String(decryptedAESKeyBytes, StandardCharsets.UTF_8);
         String decryptedText = aesDecryptService.decryptFromAES128(request.getText(), decryptedAESKey, 2);
 
         try {

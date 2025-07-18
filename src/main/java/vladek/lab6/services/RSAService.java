@@ -67,12 +67,11 @@ public class RSAService {
 
     /**
      * Зашифровывает текст при помощи общего RSA ключа
-     * @param text текст
+     * @param textBytes текст
      * @param key общий ключ
      * @return байты зашифрованного текст
      */
-    public byte[] encrypt(String text, RSAPublicKey key) {
-        byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
+    public byte[] encrypt(byte[] textBytes, RSAPublicKey key) {
         BigInteger n = new BigInteger(key.getN(), 16);
         BigInteger e = new BigInteger(key.getE(), 16);
         int blockSize = n.bitLength() - 1; // Размер блока в битах
@@ -118,9 +117,9 @@ public class RSAService {
      * Дешифрует текст при помощи секретного RSA ключа
      * @param encryptedData байты зашифрованного текста
      * @param key секретный ключ
-     * @return дешифрованный текст
+     * @return байты дешифрованного текста
      */
-    public String decrypt(byte[] encryptedData, RSAPrivateKey key) {
+    public byte[] decrypt(byte[] encryptedData, RSAPrivateKey key) {
         BigInteger n = new BigInteger(key.getN(), 16);
         BigInteger d = new BigInteger(key.getD(), 16);
         int modulusLength = n.toByteArray().length;
@@ -146,7 +145,7 @@ public class RSAService {
             decryptedBytes.writeBytes(decryptedChunkBytes);
         }
 
-        return decryptedBytes.toString(StandardCharsets.UTF_8);
+        return decryptedBytes.toByteArray();
     }
 
     /**

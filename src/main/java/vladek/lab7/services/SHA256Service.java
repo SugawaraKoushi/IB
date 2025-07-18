@@ -2,11 +2,8 @@ package vladek.lab7.services;
 
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.codec.binary.Hex;
 
 @Service
 public class SHA256Service {
