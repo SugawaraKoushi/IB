@@ -37,9 +37,15 @@ public class PrimitiveRootsService {
         BigInteger phi = eulerFunc(n);
         BigInteger rootsCount = eulerFunc(phi);
         Set<BigInteger> primeFactors = getPrimeFactors(phi);
-        int bound = Math.min(rootsCount.intValue(), 100);
 
-        for (int i = 1; i < n.intValue() && roots.size() < bound; i++) {
+        int bound;
+        try {
+            bound = Math.min(rootsCount.intValueExact(), 100);
+        } catch (ArithmeticException e) {
+            bound = 100;
+        }
+
+        for (int i = 1; i < Integer.MAX_VALUE && roots.size() < bound; i++) {
             BigInteger g = BigInteger.valueOf(i);
 
             // Число должно быть взаимно простым с n, чтобы быть его корнем
