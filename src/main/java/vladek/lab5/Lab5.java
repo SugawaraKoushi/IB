@@ -12,7 +12,7 @@ public class Lab5 {
         PrimeNumbersService pns = new PrimeNumbersService();
         PrimitiveRootsService prs = new PrimitiveRootsService(pns);
         BigInteger n = BigInteger.valueOf(1000000000);
-        Set<BigInteger> factors = prs.getAllFactors(n);
+        Set<BigInteger> factors = prs.getPrimeFactors(n);
         factors.forEach(System.out::println);
     }
 }

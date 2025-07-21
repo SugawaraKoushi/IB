@@ -36,7 +36,9 @@ public class PrimitiveRootsService {
 
         BigInteger phi = eulerFunc(n);
         BigInteger rootsCount = eulerFunc(phi);
+//        Set<BigInteger> primeFactors = getPrimeFactors(phi);
         Set<BigInteger> primeFactors = getPrimeFactors(phi);
+
 
         int bound;
         try {
@@ -79,6 +81,7 @@ public class PrimitiveRootsService {
             return n.subtract(BigInteger.ONE);
         }
 
+//        Set<BigInteger> primeFactors = getPrimeFactors(n);
         Set<BigInteger> primeFactors = getPrimeFactors(n);
 
         BigInteger result = n;
@@ -103,37 +106,37 @@ public class PrimitiveRootsService {
      *
      * @return Множество простых множителей
      */
-    private Set<BigInteger> getPrimeFactors(BigInteger n) {
-        Set<BigInteger> factors = new HashSet<>();
-
-        // Пока число делится на 2, будем делить его на 2
-        while (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
-            factors.add(BigInteger.TWO);
-            n = n.divide(BigInteger.TWO);
-        }
-
-        // После деления на 2 число осталось нечетным, делим его на нечетные числа
-        // Точно так же как с делением на 2, пока делится
-        // при этом уменьшаем границу поиска числа
-        BigInteger delimiter = BigInteger.valueOf(3);
-        BigInteger border = n.sqrt();
-        while (delimiter.compareTo(border) <= 0) {
-            while (n.mod(delimiter).equals(BigInteger.ZERO)) {
-                factors.add(delimiter);
-                n = n.divide(delimiter);
-                border = n.sqrt();
-            }
-
-            delimiter = delimiter.add(BigInteger.TWO);
-        }
-
-        // Если осталось число больше 1 - оно простое
-        if (n.compareTo(BigInteger.ONE) > 0) {
-            factors.add(n);
-        }
-
-        return factors;
-    }
+//    private Set<BigInteger> getPrimeFactors(BigInteger n) {
+//        Set<BigInteger> factors = new HashSet<>();
+//
+//        // Пока число делится на 2, будем делить его на 2
+//        while (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+//            factors.add(BigInteger.TWO);
+//            n = n.divide(BigInteger.TWO);
+//        }
+//
+//        // После деления на 2 число осталось нечетным, делим его на нечетные числа
+//        // Точно так же как с делением на 2, пока делится
+//        // при этом уменьшаем границу поиска числа
+//        BigInteger delimiter = BigInteger.valueOf(3);
+//        BigInteger border = n.sqrt();
+//        while (delimiter.compareTo(border) <= 0) {
+//            while (n.mod(delimiter).equals(BigInteger.ZERO)) {
+//                factors.add(delimiter);
+//                n = n.divide(delimiter);
+//                border = n.sqrt();
+//            }
+//
+//            delimiter = delimiter.add(BigInteger.TWO);
+//        }
+//
+//        // Если осталось число больше 1 - оно простое
+//        if (n.compareTo(BigInteger.ONE) > 0) {
+//            factors.add(n);
+//        }
+//
+//        return factors;
+//    }
 
     /**
      * Проверяет наличие первообразных корней
@@ -202,20 +205,63 @@ public class PrimitiveRootsService {
      *
      * @param n число, для которого ищутся простые множители
      */
-    public Set<BigInteger> getAllFactors(BigInteger n) {
+//    public Set<BigInteger> getAllFactors(BigInteger n) {
+//        Set<BigInteger> factors = new HashSet<>();
+//
+//        if (n.compareTo(BigInteger.ONE) <= 0) {
+//            return factors;
+//        }
+//
+//        while (!n.equals(BigInteger.ONE)) {
+//            BigInteger p = pollardRhoFactorization(n);
+//
+//            // Если число простое
+//            if (p.equals(n) || p.equals(BigInteger.ONE)) {
+//                factors.add(n);
+//                return factors;
+//            }
+//
+//            factors.add(p);
+//            n = n.divide(p);
+//        }
+//
+//        return factors;
+//    }
+
+    public Set<BigInteger> getPrimeFactors(BigInteger n) {
         Set<BigInteger> factors = new HashSet<>();
 
         if (n.compareTo(BigInteger.ONE) <= 0) {
             return factors;
         }
 
+        // Сначала проверяем маленькие простые делители (опционально)
+        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+            factors.add(BigInteger.TWO);
+            n = n.divide(BigInteger.TWO);
+            while (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+                n = n.divide(BigInteger.TWO);
+            }
+        }
+
+        // Основной цикл факторизации
         while (!n.equals(BigInteger.ONE)) {
             BigInteger p = pollardRhoFactorization(n);
 
-            // Если число простое
-            if (p.equals(n) || p.equals(BigInteger.ONE)) {
+            // Если Pollard Rho не нашёл делитель (p == 1 или p == n)
+            if (p.equals(BigInteger.ONE)) {
+                // Проверяем, не является ли n простым
+                if (n.isProbablePrime(50)) { // 50 - достаточная точность
+                    factors.add(n);
+                }
+
+                // выходим из цикла, т.к. не сможем найти больше простых множителей
+                break;
+            }
+
+            if (p.equals(n)) {
                 factors.add(n);
-                return factors;
+                break;
             }
 
             factors.add(p);
@@ -225,25 +271,54 @@ public class PrimitiveRootsService {
         return factors;
     }
 
-    /**
-     * Метод нахождения простого множителя методом Полларда "Ро"
-     */
+//    /**
+//     * Метод нахождения простого множителя методом Полларда "Ро"
+//     */
+//    public BigInteger pollardRhoFactorization(BigInteger n) {
+//        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+//            return BigInteger.TWO;
+//        }
+//
+//        BigInteger x = BigInteger.TWO;
+//        BigInteger y = BigInteger.TWO;
+//        BigInteger p = BigInteger.ONE;
+//
+//        while (p.equals(BigInteger.ONE)) {
+//            x = f(x);
+//            y = f(f(y).mod(n)).mod(n);
+//            p = gcd(x.subtract(y), n);
+//        }
+//
+//        return p;
+//    }
+
     public BigInteger pollardRhoFactorization(BigInteger n) {
+        if (n.compareTo(BigInteger.ONE) <= 0) {
+            return n; // 1, 0 или отрицательное число — возвращаем как есть
+        }
         if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
-            return BigInteger.TWO;
+            return BigInteger.TWO; // Четное число — сразу возвращаем 2
         }
 
         BigInteger x = BigInteger.TWO;
         BigInteger y = BigInteger.TWO;
         BigInteger p = BigInteger.ONE;
 
-        while (p.equals(BigInteger.ONE)) {
-            x = f(x);
-            y = f(f(y).mod(n)).mod(n);
-            p = gcd(x.subtract(y), n);
+        int maxIterations = 100_000; // Защита от бесконечного цикла
+        int iterations = 0;
+
+        while (p.equals(BigInteger.ONE) && iterations < maxIterations) {
+            x = f(x).mod(n);          // x = f(x) mod n
+            y = f(f(y).mod(n)).mod(n); // y = f(f(y) mod n) mod n
+//            p = gcd(x.subtract(y).abs(), n); // gcd(|x - y|, n)
+            p = n.gcd(x.subtract(y).abs());
+
+            iterations++;
         }
 
-        return p;
+        // Если p == n — значит, делитель не найден (возможно, n простое)
+        // Если p == 1 — тоже неудача (нужно менять параметры или f(x))
+        return p.equals(n) ? BigInteger.ONE : p;
     }
 
     private BigInteger f(BigInteger x) {

@@ -199,7 +199,7 @@ public class PrimeNumbersService {
      * @param rounds количество проверок тестом Рабина-Миллера
      * @return Число меньше 0, если число не получилось сгенерировать простое число. Иначе возвращает простое число
      */
-    public BigInteger generatePrimeNumber(int bits, int rounds) {
+    private BigInteger generatePrimeNumber(int bits, int rounds) {
         Random random = new Random();
         BigInteger p = new BigInteger(bits, random);
         p = p.setBit(0);

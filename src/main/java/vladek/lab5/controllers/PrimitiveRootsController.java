@@ -11,6 +11,7 @@ import vladek.lab5.dto.PrimitiveRootsResponse;
 import vladek.lab5.services.PrimitiveRootsService;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/lab5/primitive-roots")
@@ -23,5 +24,14 @@ public class PrimitiveRootsController {
         BigInteger n = new BigInteger(value, type);
         PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-random-root")
+    public ResponseEntity<String> getRandomPrimitiveRoot(@RequestParam String value) {
+        BigInteger n = new BigInteger(value, 16);
+        PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n);
+        Random random = new Random();
+        BigInteger root = response.getRoots().get(random.nextInt(response.getRoots().size()));
+        return new ResponseEntity<>(root.toString(16), HttpStatus.OK);
     }
 }
