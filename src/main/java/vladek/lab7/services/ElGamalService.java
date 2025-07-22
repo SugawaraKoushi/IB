@@ -1,14 +1,13 @@
 package vladek.lab7.services;
 
-import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vladek.lab4.services.PrimeNumbersService;
+import vladek.lab7.dto.ElGamalCheckSignResponse;
 import vladek.lab7.dto.ElGamalKeys;
-import vladek.lab7.dto.ElGamalSign;
+import vladek.lab7.dto.ElGamalSignResponse;
 
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.Random;
 
 @Service
@@ -39,13 +38,24 @@ public class ElGamalService {
         return k;
     }
 
-    public ElGamalSign getSign(BigInteger g, BigInteger k, BigInteger p, BigInteger x, BigInteger hashCode) {
+    public ElGamalSignResponse getSign(BigInteger g, BigInteger k, BigInteger p, BigInteger x, BigInteger hashCode) {
         BigInteger a = g.modPow(k, p);
-        BigInteger b = hashCode.subtract(x.multiply(a)).divide(k).mod(p.subtract(BigInteger.ONE));
-        ElGamalSign sign = new ElGamalSign();
+        BigInteger kInv = k.modInverse(p.subtract(BigInteger.ONE));
+        BigInteger b = hashCode.subtract(x.multiply(a)).multiply(kInv).mod(p.subtract(BigInteger.ONE));
+        ElGamalSignResponse sign = new ElGamalSignResponse();
         sign.setA(a.toString(16));
         sign.setB(b.toString(16));
         sign.setHashCode(hashCode.toString(16));
         return sign;
+    }
+
+    public ElGamalCheckSignResponse checkSign(
+            BigInteger g, BigInteger hashCode, BigInteger y, BigInteger a, BigInteger b, BigInteger p) {
+        BigInteger left = g.modPow(hashCode, p);
+        BigInteger right = y.modPow(a, p).multiply(a.modPow(b, p)).mod(p);
+        ElGamalCheckSignResponse check = new ElGamalCheckSignResponse();
+        check.setLeft(left.toString(16));
+        check.setRight(right.toString(16));
+        return check;
     }
 }

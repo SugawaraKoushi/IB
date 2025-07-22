@@ -5,9 +5,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vladek.lab7.dto.ElGamalKeys;
-import vladek.lab7.dto.ElGamalSign;
-import vladek.lab7.dto.ElGamalSignRequest;
+import vladek.lab7.dto.*;
 import vladek.lab7.services.ElGamalService;
 import vladek.lab7.services.SHA256Service;
 
@@ -36,7 +34,7 @@ public class ElGamalController {
     }
 
     @PostMapping("/sign")
-    public ResponseEntity<ElGamalSign> sign(@RequestBody ElGamalSignRequest request) {
+    public ResponseEntity<ElGamalSignResponse> sign(@RequestBody ElGamalSignRequest request) {
         byte[][] blocks = sha256Service.prepareMessageBlocks(request.getMessage());
         byte[] hashCodeBytes = sha256Service.getHashCode(blocks);
         String hashCode = Hex.encodeHexString(hashCodeBytes);
@@ -47,7 +45,22 @@ public class ElGamalController {
         BigInteger xBigInt = new BigInteger(request.getX(), 16);
         BigInteger hashCodeBigInt = new BigInteger(hashCode, 16);
 
-        ElGamalSign sign = elGamalService.getSign(gBigInt, kBigInt, pBigInt, xBigInt, hashCodeBigInt);
+        ElGamalSignResponse sign = elGamalService.getSign(gBigInt, kBigInt, pBigInt, xBigInt, hashCodeBigInt);
         return new ResponseEntity<>(sign, HttpStatus.OK);
+    }
+
+    @PostMapping("/check-sign")
+    public ResponseEntity<ElGamalCheckSignResponse> checkSign(@RequestBody ElGamalCheckSignRequest request) {
+        BigInteger gBigInt = new BigInteger(request.getG(), 16);
+        BigInteger hashCodeBigInt = new BigInteger(request.getHashCode(), 16);
+        BigInteger yBigInt = new BigInteger(request.getY(), 16);
+        BigInteger aBigInt = new BigInteger(request.getA(), 16);
+        BigInteger bBigInt = new BigInteger(request.getB(), 16);
+        BigInteger pBigInt = new BigInteger(request.getP(), 16);
+
+        ElGamalCheckSignResponse check = elGamalService.checkSign(
+                gBigInt, hashCodeBigInt, yBigInt, aBigInt, bBigInt, pBigInt
+        );
+        return new ResponseEntity<>(check, HttpStatus.OK);
     }
 }
