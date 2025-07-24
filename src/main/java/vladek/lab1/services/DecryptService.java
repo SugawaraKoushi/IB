@@ -181,36 +181,6 @@ public class DecryptService implements IDecryptService {
             bigrams[i][1] = String.valueOf(text.charAt(i * 2 + 1));
         }
 
-//        for (int i = 0; i < bigrams.length; i++) {
-//            bigrams[i][0] = String.valueOf(text.charAt(i * 2));
-//
-//            if ((i * 2 + 1) >= text.length()) {
-//                bigrams[i][1] = "я";
-//            } else {
-//                bigrams[i][1] = String.valueOf(text.charAt(i * 2 + 1));
-//            }
-//        }
-//
-//        String[] bigram;
-//        int i = 0;
-//        boolean symbolsAreEqual;
-//
-//        // Проверим каждую биграмму на совпадение символов. Если символы совпадают,
-//        // вставляем между ними символ "я", формируем новую строку и составляем биграммы заново
-//        do {
-//            bigram = bigrams[i];
-//            symbolsAreEqual = bigram[0].equals(bigram[1]);
-//
-//            if (symbolsAreEqual) {
-//                String left = text.substring(0, i * 2 + 1);
-//                String right = text.substring(i * 2 + 1);
-//                String newText = "".concat(left).concat("я").concat(right);
-//                bigrams = getBigrams(newText);
-//            }
-//
-//            i++;
-//        } while (i < bigrams.length && !symbolsAreEqual);
-
         return bigrams;
     }
 
@@ -225,6 +195,4 @@ public class DecryptService implements IDecryptService {
 
         return new int[]{row, column};
     }
-
-
 }
