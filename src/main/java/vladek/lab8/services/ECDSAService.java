@@ -35,13 +35,13 @@ public class ECDSAService {
     /**
      * Генерирует секретный ключ в диапазоне 1 < x < n - 1
      */
-    public BigInteger generateSecretKey() {
+    public BigInteger generateSecretKey(BigInteger n) {
         SecureRandom random = new SecureRandom();
         BigInteger x;
 
         do {
-            x = new BigInteger(N.bitLength(), random);
-        } while (x.compareTo(BigInteger.ONE) <= 0 || x.compareTo(N.subtract(BigInteger.ONE)) > 0);
+            x = new BigInteger(n.bitLength(), random);
+        } while (x.compareTo(BigInteger.ONE) <= 0 || x.compareTo(n.subtract(BigInteger.ONE)) > 0);
 
         return x;
     }
@@ -51,8 +51,8 @@ public class ECDSAService {
      *
      * @param x секретный ключ
      */
-    public ECDSAPoint generateOpenKey(BigInteger x) {
-        return Q.multiply(x, A, P);
+    public ECDSAPoint generateOpenKey(ECDSAPoint Q, BigInteger x, BigInteger a, BigInteger p) {
+        return Q.multiply(x, a, p);
     }
 
     /**
@@ -74,12 +74,12 @@ public class ECDSAService {
      *
      * @param hashCode хэшированное сообщение через SHA-256
      */
-    public ECDSASign sign(BigInteger hashCode, BigInteger x) {
+    public ECDSASign sign(BigInteger hashCode, BigInteger x, ECDSAPoint q, BigInteger a, BigInteger p, BigInteger n) {
         BigInteger k = generateK();
-        ECDSAPoint r = Q.multiply(k, A, P);
+        ECDSAPoint r = q.multiply(k, a, p);
 
-        BigInteger kInv = k.modInverse(N);
-        BigInteger s = hashCode.add(x.multiply(r.getX())).multiply(kInv).mod(N);
+        BigInteger kInv = k.modInverse(n);
+        BigInteger s = hashCode.add(x.multiply(r.getX())).multiply(kInv).mod(n);
 
         ECDSASign sign = new ECDSASign();
         sign.setR(r.getX().toString(16));
@@ -90,19 +90,19 @@ public class ECDSAService {
     /**
      * Проверка подписи ECDSA
      */
-    public ECDSACheckSign checkSign(ECDSAPoint p, ECDSASign sign, BigInteger hashCode) {
+    public ECDSACheckSign checkSign(ECDSAPoint p, ECDSAPoint q, ECDSASign sign, BigInteger hashCode, BigInteger n, BigInteger a, BigInteger pMod) {
         BigInteger s = new BigInteger(sign.getS(), 16);
-        BigInteger w = s.modInverse(N);
+        BigInteger w = s.modInverse(n);
 
-        BigInteger u1 = hashCode.multiply(w).mod(N);
+        BigInteger u1 = hashCode.multiply(w).mod(n);
         BigInteger r = new BigInteger(sign.getR(), 16);
-        BigInteger u2 = r.multiply(w).mod(N);
+        BigInteger u2 = r.multiply(w).mod(n);
 
-        ECDSAPoint v = Q.multiply(u1, A, P).add(p.multiply(u2, A, P), A, P);
+        ECDSAPoint v = q.multiply(u1, a, pMod).add(p.multiply(u2, a, pMod), a, pMod);
 
         ECDSACheckSign checkSign = new ECDSACheckSign();
         checkSign.setR(r.toString(16));
-        checkSign.setX(v.getX().toString(16));
+        checkSign.setV(v.getX().toString(16));
         return checkSign;
     }
 }

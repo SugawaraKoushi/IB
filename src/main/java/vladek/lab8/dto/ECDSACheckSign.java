@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ECDSACheckSign {
     private String r;
-    private String x;
+    private String v;
 }

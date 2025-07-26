@@ -31,7 +31,6 @@ public class DecryptService implements IDecryptService {
         for (int i = 0; i < text.length(); i += groupLen) {
             String group = text.substring(i, Math.min(i + groupLen, text.length()));
             String[] groupSymbols = new String[key.length()];
-            int diff = key.length() - group.length();
 
             for (int j = 0; j < groupSymbols.length; j++) {
                 int keyIndex = Character.getNumericValue(key.charAt(j)) - 1;

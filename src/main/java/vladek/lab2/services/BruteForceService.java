@@ -1,5 +1,6 @@
 package vladek.lab2.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vladek.lab2.dto.BruteForceResponse;
@@ -7,9 +8,9 @@ import vladek.lab2.dto.BruteForceResponse;
 import java.util.HashSet;
 
 @Service
+@RequiredArgsConstructor
 public class BruteForceService implements IBruteForceService {
-    @Autowired
-    private IDecryptService decryptService;
+    private final IDecryptService decryptService;
 
     @Override
     public BruteForceResponse bruteForceCombineCipher(String text, String lastKey) {
