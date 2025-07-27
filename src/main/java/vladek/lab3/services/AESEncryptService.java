@@ -17,7 +17,7 @@ public class AESEncryptService {
     public String encryptByAES128(String text, String key, int keyType) {
         // State - изначальный текст, представленный в виде 16 байт
 
-        // 1. Нормализация текста, чтобы было кратно 16 байтам. Возможно стоит заложить длину текста к закодированную штуку
+        // 1. Нормализация текста, чтобы было кратно 16 байтам
         int[] textWords = normalizeText(text);
         int[] encodedTextWords = new int[textWords.length];
 

@@ -247,7 +247,7 @@ public class AES128Helper {
         int[] result = new int[4];
 
         for (int i = 0; i < 4; i++) {
-            // Разбиваем строку по 2 байта
+            // Разбиваем строку по байту
             int s0 = (state[i] >> 24) & 0xFF;
             int s1 = (state[i] >> 16) & 0xFF;
             int s2 = (state[i] >> 8) & 0xFF;
@@ -274,7 +274,7 @@ public class AES128Helper {
         int[] result = new int[4];
 
         for (int i = 0; i < 4; i++) {
-            // Разбиваем строку по 2 байта
+            // Разбиваем строку по байту
             int s0 = (state[i] >> 24) & 0xFF;
             int s1 = (state[i] >> 16) & 0xFF;
             int s2 = (state[i] >> 8) & 0xFF;

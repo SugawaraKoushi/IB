@@ -38,7 +38,7 @@ public class AESDecryptService {
                 // - ShiftRows сдвиг строк
                 state = invShiftRows(state);
 
-                // - SubBytes заменяем по SBOXE
+                // - SubBytes заменяем по SBOXD
                 state = invSubBytes(state);
             }
 
