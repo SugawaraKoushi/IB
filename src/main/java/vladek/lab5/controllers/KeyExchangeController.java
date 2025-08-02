@@ -22,10 +22,10 @@ public class KeyExchangeController {
     public ResponseEntity<DiffieHellmanKeys> getDiffieHellmanKeys(
             @RequestParam String x1, @RequestParam String x2, @RequestParam String g, @RequestParam String n
     ) {
-        BigInteger bigX1 = new BigInteger(x1);
-        BigInteger bigX2 = new BigInteger(x2);
-        BigInteger bigG = new BigInteger(g);
-        BigInteger bigN = new BigInteger(n);
+        BigInteger bigX1 = new BigInteger(x1, 16);
+        BigInteger bigX2 = new BigInteger(x2, 16);
+        BigInteger bigG = new BigInteger(g, 16);
+        BigInteger bigN = new BigInteger(n, 16);
         DiffieHellmanKeys keys = keyExchangeService.getDiffieHellmanKeys(bigX1, bigX2, bigG, bigN);
         return new ResponseEntity<>(keys, HttpStatus.OK);
     }

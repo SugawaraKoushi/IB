@@ -21,7 +21,7 @@ public class PrimitiveRootsService {
     /**
      * Нахождение первообразных корней числа n
      */
-    public PrimitiveRootsResponse findPrimitiveRoots(BigInteger n) {
+    public PrimitiveRootsResponse findPrimitiveRoots(BigInteger n, int count) {
         List<BigInteger> roots = new ArrayList<>();
         PrimitiveRootsResponse result = new PrimitiveRootsResponse();
         StopWatch sw = new StopWatch();
@@ -36,18 +36,20 @@ public class PrimitiveRootsService {
 
         BigInteger phi = eulerFunc(n);
         BigInteger rootsCount = eulerFunc(phi);
-//        Set<BigInteger> primeFactors = getPrimeFactors(phi);
         Set<BigInteger> primeFactors = getPrimeFactors(phi);
 
 
-        int bound;
+        int rootsCountInt;
+        int maxNum;
         try {
-            bound = Math.min(rootsCount.intValueExact(), 100);
+            rootsCountInt = Math.min(rootsCount.intValueExact(), count);
+            maxNum = n.intValueExact();
         } catch (ArithmeticException e) {
-            bound = 100;
+            rootsCountInt = count;
+            maxNum = Integer.MAX_VALUE;
         }
 
-        for (int i = 1; i < Integer.MAX_VALUE && roots.size() < bound; i++) {
+        for (int i = 1; i < maxNum && roots.size() < rootsCountInt; i++) {
             BigInteger g = BigInteger.valueOf(i);
 
             // Число должно быть взаимно простым с n, чтобы быть его корнем

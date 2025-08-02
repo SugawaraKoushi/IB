@@ -22,14 +22,14 @@ public class PrimitiveRootsController {
     @GetMapping("/get-roots")
     public ResponseEntity<PrimitiveRootsResponse> getPrimitiveRoots(@RequestParam int type, @RequestParam String value) {
         BigInteger n = new BigInteger(value, type);
-        PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n);
+        PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n, 100);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/get-random-root")
     public ResponseEntity<String> getRandomPrimitiveRoot(@RequestParam String value) {
         BigInteger n = new BigInteger(value, 16);
-        PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n);
+        PrimitiveRootsResponse response = primitiveRootsService.findPrimitiveRoots(n, 100000);
         Random random = new Random();
         BigInteger root = response.getRoots().get(random.nextInt(response.getRoots().size()));
         return new ResponseEntity<>(root.toString(16), HttpStatus.OK);
