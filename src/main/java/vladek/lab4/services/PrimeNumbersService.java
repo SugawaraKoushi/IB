@@ -5,7 +5,7 @@ import org.springframework.util.StopWatch;
 import vladek.lab4.dto.PrimeTestResult;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class PrimeNumbersService {
@@ -15,14 +15,14 @@ public class PrimeNumbersService {
      *
      * @param n нечетное число >= 5
      * @return Число меньше 0, если число составное.
-     * Число равное 0, если число Карлмайкла.
+     * Число равное 0, если число является числом Кармайкла
      * Число больше 0, если число вероятно простое.
      * А так же затраченное время на определение простоты.
      */
     public PrimeTestResult fermatTest(long n) {
         Random random = new Random();
         boolean isPrimeNumber = false;
-        boolean isCarlmichaelNumber = true;
+        boolean isCarmichaelNumber;
         int iterations = 20;
         StopWatch sw = new StopWatch();
         PrimeTestResult result = new PrimeTestResult();
@@ -35,42 +35,103 @@ public class PrimeNumbersService {
             if (r == 1) {
                 isPrimeNumber = true;
             } else {
-                isCarlmichaelNumber = false;
-
                 if (isPrimeNumber) {
+                    // Проверим, является ли оно числом Кармайкла
+                    List<Long> primeFactors = getPrimeFactors(n);
+                    isCarmichaelNumber = isSquareFree(primeFactors) && primeFactors.size() > 2;
+
                     sw.stop();
-                    result.setNumberType(-1);
                     result.setSeconds(sw.getTotalTimeSeconds());
+                    if (isCarmichaelNumber) {
+                        result.setNumberType(0);
+                    } else {
+                        result.setNumberType(-1);
+                    }
+
                     return result;
                 }
             }
         }
 
+        // Если число составное
         if (!isPrimeNumber) {
-            sw.stop();
-            result.setNumberType(-1);
-            result.setSeconds(sw.getTotalTimeSeconds());
-            return result;
-        }
+            // Проверим, является ли оно числом Кармайкла
+            List<Long> primeFactors = getPrimeFactors(n);
+            isCarmichaelNumber = isSquareFree(primeFactors) && primeFactors.size() > 2;
 
-        if (!isCarlmichaelNumber) {
+
             sw.stop();
-            result.setNumberType(1);
             result.setSeconds(sw.getTotalTimeSeconds());
+            if (isCarmichaelNumber) {
+                result.setNumberType(0);
+            } else {
+                result.setNumberType(-1);
+            }
+
             return result;
         }
 
         sw.stop();
-        result.setNumberType(0);
+        result.setNumberType(1);
         result.setSeconds(sw.getTotalTimeSeconds());
         return result;
     }
 
     /**
+     * Поиск простых множителей числа с учётом кратности
+     *
+     * @param n число, для которого ищутся простые множители
+     * @return список простых множителей
+     */
+    private List<Long> getPrimeFactors(long n) {
+        List<Long> factors = new ArrayList<>();
+
+        // Пока число делится на 2, будем делить его на 2
+        while (n % 2 == 0) {
+            factors.add(2L);
+            n /= 2;
+        }
+
+        // После деления на 2 число осталось нечетным, делим его на нечетные числа
+        // Точно так же как с делением на 2, пока делится
+        // при этом уменьшаем границу поиска числа
+        for (long i = 3; i < Math.sqrt(n); i += 2) {
+            while (n % i == 0) {
+                factors.add(i);
+                n /= i;
+            }
+        }
+
+        // Если осталось число больше 1 - оно простое
+        if (n > 1) {
+            factors.add(n);
+        }
+
+        return factors;
+    }
+
+    /**
+     * Проверка числа, что оно свободно от квадратов (нет повторяющихся множителей)
+     *
+     * @param factors список простых множителей числа
+     * @return истина, если число свободно от квадратов. Иначе - ложь
+     */
+    private static boolean isSquareFree(List<Long> factors) {
+        for (int i = 0; i < factors.size() - 1; i++) {
+            if (factors.get(i).equals(factors.get(i + 1))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Эффективное возведение числа в степень по модулю
-     * @param a число возводимое в степень
+     *
+     * @param a        число возводимое в степень
      * @param exponent степень
-     * @param mod модуль
+     * @param mod      модуль
      */
     private long modPow(long a, long exponent, long mod) {
         long result = 1;
@@ -169,7 +230,8 @@ public class PrimeNumbersService {
      * Тест простоты через делимость
      *
      * @param n число
-     * @return простота числа
+     * @return Отрицательное число, если n составное
+     * Положительное число, если n простое
      */
     public PrimeTestResult divisionTest(long n) {
         PrimeTestResult result = new PrimeTestResult();
@@ -215,7 +277,7 @@ public class PrimeNumbersService {
         for (int prime : primes) {
             BigInteger n = BigInteger.valueOf(prime);
 
-            if (p.equals(n)){
+            if (p.equals(n)) {
                 return p;
             }
 
@@ -225,7 +287,7 @@ public class PrimeNumbersService {
         }
 
         for (int i = 0; i < rounds; i++) {
-            if (millerRabinTest(p, rounds).getNumberType() < 0) {
+            if (millerRabinTest(p, 50).getNumberType() < 0) {
                 return new BigInteger("-1");
             }
         }
