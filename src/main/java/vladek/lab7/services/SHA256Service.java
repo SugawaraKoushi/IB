@@ -28,8 +28,8 @@ public class SHA256Service {
         byte[] msgBytes = sourceMsg.getBytes(StandardCharsets.UTF_8);
         int originalBitLength = msgBytes.length * 8;
 
-        // Вычисляем необходимое количество блоков
-        int totalBlocks = ((msgBytes.length + 8 + 1) + 63) / 64; // +8 байт для длины, +1 для бита "1"
+        // Вычисляем необходимое количество блоков вместе с добавленным битом "1" и недостающими нулями
+        int totalBlocks = (msgBytes.length + 8 + 1 + 63) / 64;
 
         byte[][] blocks = new byte[totalBlocks][64];
         int bytesCopied = 0;
@@ -52,7 +52,7 @@ public class SHA256Service {
         // Добавляем бит "1" как байт
         lastBlock[msgBytes.length - bytesCopied] = (byte) 0x80;
 
-        // Добавляем длину сообщения (64 бита) в конец последнего блока
+        // Добавляем длину сообщения в битах в конец последнего блока
         // 56 - потому что в предыдущем шаге добавили "1000 0000"
         ByteBuffer.wrap(lastBlock, 56, 8).putLong(originalBitLength);
 

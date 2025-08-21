@@ -17,7 +17,8 @@ public class ElGamalService {
 
     public ElGamalKeys keyGeneration(BigInteger p, BigInteger a) {
         Random random = new Random();
-        BigInteger x = new BigInteger(p.clearBit(0).bitLength(), random);
+//        BigInteger x = new BigInteger(p.clearBit(0).bitLength(), random);
+        BigInteger x = BigInteger.valueOf(17);
         BigInteger y = a.modPow(x, p);
         ElGamalKeys keys = new ElGamalKeys();
         keys.setP(p.toString(16));
@@ -41,6 +42,7 @@ public class ElGamalService {
     public ElGamalSignResponse getSign(BigInteger g, BigInteger k, BigInteger p, BigInteger x, BigInteger hashCode) {
         BigInteger a = g.modPow(k, p);
         BigInteger kInv = k.modInverse(p.subtract(BigInteger.ONE));
+        hashCode = BigInteger.valueOf(5);
         BigInteger b = hashCode.subtract(x.multiply(a)).multiply(kInv).mod(p.subtract(BigInteger.ONE));
         ElGamalSignResponse sign = new ElGamalSignResponse();
         sign.setA(a.toString(16));
