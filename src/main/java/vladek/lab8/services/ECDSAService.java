@@ -20,7 +20,7 @@ public class ECDSAService {
     );
     private static final BigInteger A = BigInteger.valueOf(-3);
     private static final BigInteger B = new BigInteger(
-            "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16
+                "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16
     );
     private static final ECDSAPoint Q = new ECDSAPoint(
             new BigInteger(
@@ -58,13 +58,13 @@ public class ECDSAService {
     /**
      * Генерирует число k в диапазоне 1 <= k <= n
      */
-    private BigInteger generateK() {
+    private BigInteger generateK(BigInteger n) {
         SecureRandom random = new SecureRandom();
         BigInteger k;
 
         do {
-            k = new BigInteger(N.bitLength(), random);
-        } while (k.compareTo(BigInteger.ONE) < 0 || k.compareTo(N) > 0);
+            k = new BigInteger(n.bitLength(), random);
+        } while (k.compareTo(BigInteger.ONE) < 0 || n.compareTo(N) > 0);
 
         return k;
     }
@@ -75,7 +75,7 @@ public class ECDSAService {
      * @param hashCode хэшированное сообщение через SHA-256
      */
     public ECDSASign sign(BigInteger hashCode, BigInteger x, ECDSAPoint q, BigInteger a, BigInteger p, BigInteger n) {
-        BigInteger k = generateK();
+        BigInteger k = generateK(n);
         ECDSAPoint r = q.multiply(k, a, p);
 
         BigInteger kInv = k.modInverse(n);
